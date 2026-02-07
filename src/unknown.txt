@@ -1,0 +1,12 @@
+
+## Support
+
+For packaging issues:
+1. Check file permissions
+2. Verify all paths are relative
+3. Test on a clean system
+4. Review exclusion patterns
+
+---
+
+Built with ❤️ using [caffeine.ai](https://caffeine.ai)

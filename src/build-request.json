@@ -1,0 +1,83 @@
+{
+  "kind": "build_request",
+  "title": "Add Christian (Hindi/English) radio stations from Radio Browser tag feed without affecting existing stations",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-4",
+      "text": "Fetch additional radio stations from the Radio Browser endpoint for tag \"christian\" and merge them into the app’s existing global station list without removing or altering any previously available stations.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Kindly add additional, Radio chanel from below code, make sure don't distrub previous added radio channel ok.\n\nlet audio = new Audio();\n\nasync function loadChristianRadio() {\n  const url =\n    \"https://api.radio-browser.info/json/stations/bytag/christian\";\n\n  const res = await fetch(url);\n  const data = await res.json();\n\n  // Filter Hindi & English manually\n  const radios = data.filter(s =>\n    s.language.toLowerCase().includes(\"hindi\") ||\n    s.language.toLowerCase().includes(\"english\")\n  );\n\n  radios.forEach((s, i) => {\n    console.log(`${i + 1}. ${s.name}`);\n    console.log(\"Lang:\", s.language);\n    console.log(\"URL:\", s.url);\n    console.log(\"------\");\n  });\n\n  if (radios.length > 0) {\n    audio.src = radios[0].url;\n    audio.play();\n  }\n}\n\nloadChristianRadio();"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When loading stations, the returned list includes all previously available global stations plus additional stations sourced from the \"christian\" tag feed.",
+        "No existing station is removed from the list as a result of adding the new Christian-tag stations (the station count should stay the same or increase, never decrease, given identical upstream data).",
+        "Christian-tag stations are filtered to languages that include \"hindi\" or \"english\" (case-insensitive), matching the user-provided logic.",
+        "The app remains functional with existing features (search, bookmarks, playback, refresh) using the merged station list."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement resilient fetching for the Christian-tag station feed using the same server failover approach as the existing global station fetch (multiple Radio Browser servers), and apply the same basic station validity checks used by the app (e.g., resolved stream URL present, valid coordinates where required by the globe/pins pipeline).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "https://api.radio-browser.info/json/stations/bytag/christian"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If one Radio Browser server fails, the app attempts alternate servers before giving up on fetching the Christian-tag stations.",
+        "Only stations with a usable stream URL (prefer url_resolved when available; otherwise fall back to url if needed) are added.",
+        "The merged list does not introduce runtime errors in components that assume coordinates exist (e.g., globe/pins)."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Ensure the merged station list is cached consistently with the existing multi-layer caching approach so that Christian-tag stations persist across reloads and are included after a station refresh without requiring code changes elsewhere in the UI.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After a normal reload (without clearing caches), Christian-tag stations remain present in the station list if they were previously fetched successfully.",
+        "Using the existing Refresh action continues to work and results in a refreshed merged list that still includes Christian-tag stations.",
+        "No new TypeScript/lint errors are introduced by the changes (project builds cleanly)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not remove, rename, or otherwise disturb any existing station sources, station processing logic, or UI flows; only extend the station dataset by merging in the additional Christian-tag stations.",
+    "Keep changes within the existing React + React Query + Tailwind stack and the current single-backend-actor architecture (no new backend services).",
+    "Do not edit files under frontend/src/components/ui or any other immutable paths listed in SYSTEM_CONTEXT."
+  ],
+  "nonGoals": [
+    "Do not add a new dedicated UI page/overlay specifically for Christian stations (stations should simply become available throughout the existing app).",
+    "Do not change the autoplay behavior (e.g., do not force playback of a Christian station).",
+    "Do not add new authentication requirements or backend schema changes for this feature."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}

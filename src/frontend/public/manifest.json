@@ -1,0 +1,27 @@
+{
+  "name": "Gracy FM Radio Live",
+  "short_name": "Gracy FM Radio",
+  "description": "Listen to 9,000+ radio stations from around the world",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/generated/global-fm-pwa-icon-blue-space.dim_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/generated/global-fm-pwa-icon-blue-space.dim_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment"],
+  "lang": "en",
+  "dir": "ltr"
+}

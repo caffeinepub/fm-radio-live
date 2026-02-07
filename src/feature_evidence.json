@@ -1,0 +1,65 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-fetch-additional-radio-stations-from-the-radio-browser-endpoint-for-tag-christian-and-merge-them-into-the-app-s-existing-global-station-list-without-removing-or-altering-any-previously-available-stations",
+      "featureTitle": "Fetch additional radio stations from the Radio Browser endpoint for tag \"christian\" and merge them into the app’s existing global station list without removing or altering any previously available stations.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "authorization@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-resilient-fetching-for-the-christian-tag-station-feed-using-the-same-server-failover-approach-as-the-existing-global-station-fetch-multiple-radio-browser-servers-and-apply-the-same-basic-station-validity-checks-used-by-the-app-e-g-resolved-stream-url-present-valid-coordinates-where-required-by-the-globe-pins-pipeline",
+      "featureTitle": "Implement resilient fetching for the Christian-tag station feed using the same server failover approach as the existing global station fetch (multiple Radio Browser servers), and apply the same basic station validity checks used by the app (e.g., resolved stream URL present, valid coordinates where required by the globe/pins pipeline).",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "authorization@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-merged-station-list-is-cached-consistently-with-the-existing-multi-layer-caching-approach-so-that-christian-tag-stations-persist-across-reloads-and-are-included-after-a-station-refresh-without-requiring-code-changes-elsewhere-in-the-ui",
+      "featureTitle": "Ensure the merged station list is cached consistently with the existing multi-layer caching approach so that Christian-tag stations persist across reloads and are included after a station refresh without requiring code changes elsewhere in the UI.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "authorization@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

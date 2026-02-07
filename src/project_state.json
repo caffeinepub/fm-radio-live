@@ -1,0 +1,348 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 9,
+  "summary": "Global FM / “Gracy FM Radio Live” is a web/PWA app that loads thousands of worldwide radio stations from the Radio Browser API, provides search/selection UI, and streams the selected station with a resilient HTML5 audio player. The frontend is built with React + TanStack React Query (multi-layer caching and background lazy-loading optimized for slow networks), optional authentication via Internet Computer Internet Identity, and a Motoko backend canister that implements role-based access control plus user profile/statistics endpoints used by an authenticated user dashboard. The UI includes PWA install prompting, service-worker offline caching for core assets, donation modal, bookmarking, and a fully implemented 3D space + Earth/globe scene with radio pins and supporting UI elements (header/tagline/counter/toggles), with shadcn/ui components incorporated for consistent UI primitives.",
+  "architectural_notes": [
+    "Frontend uses TanStack React Query as the primary async/state layer for station data and backend actor calls (query keys, staleTime/gcTime, invalidate/remove on refresh).",
+    "Station list retrieval is optimized for slow networks via multi-layer client caching (in-memory + IndexedDB + localStorage) with TTL and periodic persistence, plus continuous background batch loading.",
+    "Radio station fetching uses Radio Browser API with server failover and GPRS-friendly batching (limit/offset) and timeouts.",
+    "Station processing pipeline performs coordinate validation, deterministic coordinate-based deduplication, scoring, and sorting before caching/serving data.",
+    "Frontend authentication uses Internet Identity (AuthClient) with a React context provider; identity changes trigger actor recreation and query invalidation.",
+    "Backend is a Motoko canister with role-based access control (admin/user/guest), using in-memory Maps keyed by Principal for state.",
+    "PWA support via custom service worker (cache-first for static assets, network-first for navigations, network-only for streams/external APIs) plus registration/update hooks and an install prompt component.",
+    "UI is modal-driven (search/dashboard/donation) and uses localStorage for lightweight user preferences (bookmarks, dismissals).",
+    "3D rendering uses React Three Fiber + Three.js for a space/starfield backdrop (memoized geometries, per-frame animation).",
+    "3D scene now includes a functional Earth/globe and coordinate-based radio pin rendering (EarthScene/Earth/RadioPins/RadioPin) integrated with the existing Three.js space backdrop."
+  ],
+  "known_issues": [
+    "useQueries.ts uses module-level mutable state for lazy-loading/caches; multiple hook instances or hot reloads can cause cross-instance interference.",
+    "AbortSignal.timeout() is used for fetch timeouts; older browsers may not support it without a polyfill.",
+    "BlinkingStars updates star sizes using Math.random() every frame, which can cause unnecessary churn/GC and non-deterministic twinkle behavior."
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "Global radio station retrieval (Radio Browser API) with server failover",
+      "synonyms": [
+        "Station API fetch",
+        "Radio Browser integration"
+      ],
+      "description": "Fetches stations from Radio Browser using correct query parameters (hidebroken=true, order=votes, reverse=true) with fallback across multiple API servers and a 15s timeout per server.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "Background lazy batch loading of stations",
+      "synonyms": [
+        "Incremental loading",
+        "Continuous station loading"
+      ],
+      "description": "After initial station data is available, automatically loads additional batches every ~3 seconds using offset/limit pagination until completion (stops after 3 consecutive empty batches).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Station data validation and scoring",
+      "synonyms": [
+        "Station processing pipeline",
+        "Quality filtering"
+      ],
+      "description": "Filters stations to require valid coordinates, resolved stream URL, country, and minimum bitrate threshold; computes a quality score (votes, clickcount, bitrate) and sorts deterministically.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Deterministic coordinate-based deduplication",
+      "synonyms": [
+        "Geo dedupe",
+        "Pin deduplication"
+      ],
+      "description": "Deduplicates stations by rounded lat/long (toFixed(3)) and selects the best station per coordinate using a deterministic scoring and UUID tie-breaker.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "Multi-layer caching for station list (memory, IndexedDB, localStorage, React Query)",
+      "synonyms": [
+        "Offline-ish cache",
+        "GPRS optimized caching"
+      ],
+      "description": "Implements a 45-minute TTL cache with priority: in-memory → IndexedDB → localStorage → network; keeps React Query cache updated and persists periodically during background loading.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Global cache reset and refresh flow",
+      "synonyms": [
+        "Hard refresh stations",
+        "Clear station cache"
+      ],
+      "description": "Provides clearAllCaches() to reset in-memory state, localStorage, and IndexedDB; UI refresh button invalidates/removes React Query cache and refetches fresh data.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Station search overlay",
+      "synonyms": [
+        "Station finder",
+        "Search modal"
+      ],
+      "description": "Modal overlay that filters stations by name/country/state/language, shows top results with result limits (top 50 default; up to 100 matches), and supports Escape/backdrop closing.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Audio streaming player with resilient reconnection",
+      "synonyms": [
+        "Radio player",
+        "Stream playback"
+      ],
+      "description": "HTMLAudioElement-based player with play/pause, next/previous, close, and volume/mute controls; includes exponential-backoff reconnection (up to 10 retries) for errors/stalls.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Playback info display with share support",
+      "synonyms": [
+        "Now playing card",
+        "Share station"
+      ],
+      "description": "Displays the selected station’s name and location, derives a flag emoji from country code/name, and shares via Web Share API with clipboard fallback and toast notifications.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Local bookmarks for stations",
+      "synonyms": [
+        "Favorites",
+        "Bookmarking"
+      ],
+      "description": "Allows bookmarking/unbookmarking of stations by UUID stored in localStorage; bookmark state is reflected in the playback UI and used by the dashboard.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "User dashboard modal (bookmarks + aggregated stats)",
+      "synonyms": [
+        "Dashboard",
+        "User stats modal"
+      ],
+      "description": "Authenticated dashboard modal that displays weekly/monthly/lifetime user metrics from the backend and lists bookmarked stations filtered from the global station list.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Donation modal with copy-to-clipboard",
+      "synonyms": [
+        "Support modal",
+        "Crypto donation"
+      ],
+      "description": "Donation UI with USDT (BSC), ICP, and Bitcoin addresses; includes clipboard copy, visual feedback, toasts, and Escape/backdrop closing.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-13",
+      "title": "Internet Identity authentication context",
+      "synonyms": [
+        "II login",
+        "DFINITY auth"
+      ],
+      "description": "Provides an InternetIdentityProvider using @dfinity/auth-client to load existing sessions, start login with configured derivation origin, and logout/clear identity state.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-14",
+      "title": "Backend actor creation tied to identity",
+      "synonyms": [
+        "IC actor hook",
+        "Authenticated canister client"
+      ],
+      "description": "useActor builds an anonymous or authenticated canister actor (identity-aware agent options), calls initializeAccessControl() after login, and invalidates/refetches dependent queries when the actor changes.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-15",
+      "title": "Motoko backend role-based access control (admin/user/guest)",
+      "synonyms": [
+        "Authorization module",
+        "RBAC"
+      ],
+      "description": "Access control module assigns the first non-anonymous caller as admin, subsequent callers as users, supports admin role assignment, and enforces permissions for protected endpoints.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-16",
+      "title": "Motoko backend user profiles and statistics APIs",
+      "synonyms": [
+        "User metadata",
+        "Stats aggregation"
+      ],
+      "description": "Stores user profiles, per-user stats, and channel status keyed by Principal; provides self/admin read APIs and aggregated totals (e.g., total weekly/monthly active users) for the dashboard.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "PWA offline support (service worker + registration)",
+      "synonyms": [
+        "Offline caching",
+        "SW lifecycle"
+      ],
+      "description": "Registers a custom service worker and implements caching: cache-first for static assets, network-first for navigations, and network-only for radio streams/external APIs; includes update detection callbacks.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-18",
+      "title": "PWA install prompt with dismissal tracking",
+      "synonyms": [
+        "Install banner",
+        "beforeinstallprompt handling"
+      ],
+      "description": "Captures the beforeinstallprompt event, shows an install prompt after a delay, records dismissals for 7 days, and hides itself once installed.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-19",
+      "title": "3D space background scene with animated starfield",
+      "synonyms": [
+        "Three.js background",
+        "Blinking stars"
+      ],
+      "description": "Renders a black-space background using React Three Fiber with a memoized points geometry starfield and per-frame opacity/size updates to simulate soft twinkling.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-20",
+      "title": "Portrait orientation locking",
+      "synonyms": [
+        "Orientation enforcement",
+        "Portrait-only UI"
+      ],
+      "description": "Attempts to lock screen orientation to portrait via the Screen Orientation API and includes CSS-based landscape rotation prevention for mobile devices.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-21",
+      "title": "3D Earth/globe scene with radio station pins",
+      "synonyms": [
+        "Globe view",
+        "EarthScene",
+        "RadioPins"
+      ],
+      "description": "Implements the previously stubbed EarthScene/Earth/RadioPins/RadioPin components so the app can render an Earth/globe visualization and place interactive station pins based on station coordinates.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-22",
+      "title": "Implemented core UI chrome components (header/tagline/counter/toggles)",
+      "synonyms": [
+        "Header",
+        "Tagline",
+        "StationCounter",
+        "DayNightToggle",
+        "DistantPlanets"
+      ],
+      "description": "Fills in previously empty UI components to provide complete app chrome and visual controls, including header/tagline presentation, station count display, day/night toggle, and additional scene elements.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-23",
+      "title": "shadcn/ui component library integration",
+      "synonyms": [
+        "UI primitives",
+        "shadcn components"
+      ],
+      "description": "Adds shadcn/ui-based component primitives and supporting tooling/configuration in the build template/front-end for consistent dialogs, buttons, inputs, and other UI elements.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-user-dashboard-overlay-ui-to-remove-the-entire-active-users-statistics-section-including-the-active-users-header-and-the-three-metric-cards-labeled-weekly-monthly-and-lifetime",
+      "title": "Update the User Dashboard overlay UI to remove the entire \"Active Users\" statistics section, including the \"Active Users\" header and the three metric cards labeled \"Weekly\", \"Monthly\", and \"Lifetime\".",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-after-removing-the-active-users-section-add-a-new-section-in-the-user-dashboard-content-titled-about-gracy-fm-containing-exactly-the-following-english-text-lines-this-application-is-developed-by-bhawan-bisht-and-built-on-chain-powered-by-the-internet-computer-protocol-email-bsbnpl-gmail-com-mobile-91-9521460319",
+      "title": "After removing the \"Active Users\" section, add a new section in the User Dashboard content titled \"About Gracy FM\" containing exactly the following English text lines:\n\n- \"This application is developed by Bhawan Bisht and built on-chain, powered by the Internet Computer Protocol.\"\n- \"Email: bsbnpl@gmail.com\"\n- \"Mobile: +91 9521460319\"",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-any-now-unused-frontend-code-related-to-the-removed-active-users-metrics-in-the-user-dashboard-component-e-g-unused-imports-and-unused-stats-query-hook-usage-so-the-project-builds-cleanly-without-unused-variable-lint-type-errors",
+      "title": "Remove any now-unused frontend code related to the removed Active Users metrics in the User Dashboard component (e.g., unused imports and unused stats query/hook usage) so the project builds cleanly without unused-variable/lint/type errors.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fetch-additional-radio-stations-from-the-radio-browser-endpoint-for-tag-christian-and-merge-them-into-the-app-s-existing-global-station-list-without-removing-or-altering-any-previously-available-stations",
+      "title": "Fetch additional radio stations from the Radio Browser endpoint for tag \"christian\" and merge them into the app’s existing global station list without removing or altering any previously available stations.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-resilient-fetching-for-the-christian-tag-station-feed-using-the-same-server-failover-approach-as-the-existing-global-station-fetch-multiple-radio-browser-servers-and-apply-the-same-basic-station-validity-checks-used-by-the-app-e-g-resolved-stream-url-present-valid-coordinates-where-required-by-the-globe-pins-pipeline",
+      "title": "Implement resilient fetching for the Christian-tag station feed using the same server failover approach as the existing global station fetch (multiple Radio Browser servers), and apply the same basic station validity checks used by the app (e.g., resolved stream URL present, valid coordinates where required by the globe/pins pipeline).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-merged-station-list-is-cached-consistently-with-the-existing-multi-layer-caching-approach-so-that-christian-tag-stations-persist-across-reloads-and-are-included-after-a-station-refresh-without-requiring-code-changes-elsewhere-in-the-ui",
+      "title": "Ensure the merged station list is cached consistently with the existing multi-layer caching approach so that Christian-tag stations persist across reloads and are included after a station refresh without requiring code changes elsewhere in the UI.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Update User Dashboard section: remove Active Users, Weekly, Monthly, and Lifetime metrics; add an \"About Gracy FM\" section with provided developer/on-chain text and contact info (email + mobile).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add additional radio stations/channels sourced from Radio Browser tag \"christian\", filtered to Hindi/English languages, integrating into the existing app without affecting previously added stations/channels.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Global FM (Gracy FM Radio Live)",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

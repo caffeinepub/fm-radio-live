@@ -1,0 +1,39 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-07T08:00:06.877Z",
+  "summary": "The diff shows preliminary integration work in `frontend/src/hooks/useQueries.ts` for “Christian stations” (new in-memory state and cache reset handling). However, the provided diff is truncated before any fetch/merge logic, so key REQ-4/5/6 acceptance criteria cannot be confirmed from the available evidence.",
+  "missing_requirements": [
+    {
+      "id": "REQ-4",
+      "requirement": "Fetch additional radio stations from the Radio Browser endpoint for tag \"christian\" and merge them into the app’s existing global station list without removing or altering any previously available stations; filter to languages including \"hindi\" or \"english\" (case-insensitive).",
+      "reason": "The diff excerpt adds Christian-station state (`christianStationsFetched`, `christianStationsCache`) but does not show any implemented network request to the Radio Browser tag feed, language filtering, UUID deduplication, or merge into the global station list. Because `useQueries.ts` is truncated, these behaviors cannot be verified.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Implement resilient fetching for the Christian-tag station feed using the same server failover approach as existing global station fetch; apply the same station validity checks (prefer url_resolved, fallback to url; ensure no runtime errors for coordinate-dependent components).",
+      "reason": "No visible code in the truncated excerpt demonstrates multi-server failover for the Christian-tag endpoint or the validity checks for stream URL/coordinates being applied to the Christian-tag results before merging.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Ensure the merged station list is cached consistently with the existing multi-layer caching approach so Christian-tag stations persist across reloads and after refresh, without other UI changes.",
+      "reason": "While `clearAllCaches()` now resets Christian-related in-memory state, the excerpt does not show Christian stations being persisted to IndexedDB/localStorage alongside existing caching, nor that refresh/refetch results in a merged cached list including Christian-tag stations.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts (truncated)"
+      ]
+    }
+  ],
+  "hallucinated_features": [],
+  "confidence": 0.56,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/src/hooks/useQueries.ts",
+    "project_state.json"
+  ]
+}

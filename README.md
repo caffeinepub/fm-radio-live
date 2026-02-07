@@ -1,2 +1,3 @@
-# fm-radio-live
-Exported from Caffeine project: Global FM (Gracy FM Radio Live)
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`
