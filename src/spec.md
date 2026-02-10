@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Add additional Christian radio stations (Hindi/English) from the Radio Browser “christian” tag feed to the existing global station list without impacting existing stations or UI behavior.
+**Goal:** Make the audio spectrum analyzer react to the currently playing radio stream and restore the centered FM radio symbol overlay.
 
 **Planned changes:**
-- Fetch stations from the Radio Browser `bytag/christian` endpoint using the same multi-server failover strategy as the current global station fetch.
-- Filter fetched Christian-tag stations to languages containing “hindi” or “english” (case-insensitive).
-- Validate and normalize stations before merging (use `url_resolved` when available, otherwise `url`; ensure required fields like coordinates do not break globe/pins usage).
-- Merge the additional stations into the existing station dataset without removing or altering previously available stations.
-- Cache the merged station list using the app’s existing caching layers so the added stations persist across reloads and after refresh.
+- Fix `AudioSpectrumAnalyzer` so it connects to the app’s active audio output and animates frequency bars during playback, while showing a clear idle state when not playing.
+- Ensure Web Audio initialization works reliably with the app’s audio element and respects autoplay/user-gesture requirements without producing console-error spam.
+- Restore the centered FM/radio symbol overlay in the main display and ensure it remains visible, non-interactive (doesn’t block clicks), and consistent across light/dark themes.
+- Update `frontend/src/App.tsx` center-overlay logic to match the restored FM symbol + analyzer behavior, removing broken/unused overlay code and keeping existing UI/3D scene intact.
 
-**User-visible outcome:** The app continues to work as before (search, bookmarks, playback, refresh), but now includes additional Christian-tag Hindi/English stations alongside all previously available stations.
+**User-visible outcome:** When a station plays, the spectrum bars animate in sync with the audio; when not playing, the analyzer displays an idle state. The FM radio symbol is visible again in the center overlay without interfering with interactions.

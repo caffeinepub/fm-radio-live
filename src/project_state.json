@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 15,
   "summary": "Global FM / “Gracy FM Radio Live” is a web/PWA app that loads thousands of worldwide radio stations from the Radio Browser API, provides search/selection UI, and streams the selected station with a resilient HTML5 audio player. The frontend is built with React + TanStack React Query (multi-layer caching and background lazy-loading optimized for slow networks), optional authentication via Internet Computer Internet Identity, and a Motoko backend canister that implements role-based access control plus user profile/statistics endpoints used by an authenticated user dashboard. The UI includes PWA install prompting, service-worker offline caching for core assets, donation modal, bookmarking, and a fully implemented 3D space + Earth/globe scene with radio pins and supporting UI elements (header/tagline/counter/toggles), with shadcn/ui components incorporated for consistent UI primitives.",
   "architectural_notes": [
     "Frontend uses TanStack React Query as the primary async/state layer for station data and backend actor calls (query keys, staleTime/gcTime, invalidate/remove on refresh).",
@@ -17,9 +17,10 @@
   "known_issues": [
     "useQueries.ts uses module-level mutable state for lazy-loading/caches; multiple hook instances or hot reloads can cause cross-instance interference.",
     "AbortSignal.timeout() is used for fetch timeouts; older browsers may not support it without a polyfill.",
-    "BlinkingStars updates star sizes using Math.random() every frame, which can cause unnecessary churn/GC and non-deterministic twinkle behavior."
+    "BlinkingStars updates star sizes using Math.random() every frame, which can cause unnecessary churn/GC and non-deterministic twinkle behavior.",
+    "Audio spectrum analyzer visualization is not reacting to the currently playing audio stream (no response)."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "IF-1",
@@ -325,6 +326,78 @@
         "REQ-6"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-when-the-station-list-loads-including-from-memory-indexeddb-localstorage-react-query-caches-ensure-christian-religious-stations-jesus-or-bible-based-appear-first-in-the-overall-station-list-without-removing-any-previously-available-stations",
+      "title": "When the station list loads (including from memory/IndexedDB/localStorage/React Query caches), ensure Christian religious stations (Jesus- or Bible-based) appear first in the overall station list without removing any previously available stations.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-hindi-christian-indian-christian-radio-stations-using-a-free-api-provider-prefer-radio-browser-api-and-merge-them-into-the-existing-global-station-list-with-deduplication-so-the-app-gains-additional-hindi-christian-stations-without-breaking-existing-station-retrieval",
+      "title": "Add Hindi Christian (Indian Christian) radio stations using a free API provider (prefer Radio Browser API), and merge them into the existing global station list with deduplication so the app gains additional Hindi Christian stations without breaking existing station retrieval.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-resilient-fetching-and-caching-for-the-prioritized-christian-hindi-christian-stations-so-they-persist-across-reloads-and-are-included-after-using-the-app-s-refresh-reset-flow-using-the-same-multi-layer-caching-approach-already-used-for-the-global-station-list",
+      "title": "Implement resilient fetching and caching for the prioritized Christian + Hindi Christian stations so they persist across reloads and are included after using the app’s refresh/reset flow, using the same multi-layer caching approach already used for the global station list.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-centered-main-display-overlay-that-currently-renders-the-text-gracy-fm-radio-and-the-radio-icon-and-replace-that-center-overlay-with-a-real-time-audio-spectrum-analyzer-visualization",
+      "title": "Remove the centered, main-display overlay that currently renders the text \"Gracy FM Radio\" and the Radio icon, and replace that center overlay with a real-time audio spectrum analyzer visualization.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-spectrum-analyzer-so-it-reacts-dynamically-to-the-currently-playing-radio-stream-audio-output-with-smooth-animations-multiple-vibrant-colors-and-a-visually-engaging-wow-effect-while-being-performance-optimized-and-synchronized-with-the-audio-stream",
+      "title": "Implement the spectrum analyzer so it reacts dynamically to the currently playing radio stream audio output, with smooth animations, multiple vibrant colors, and a visually engaging \"wow\" effect, while being performance-optimized and synchronized with the audio stream.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-clean-up-any-now-unused-styling-and-code-paths-related-to-the-removed-centered-title-including-the-gracy-fm-radio-title-styling-if-it-becomes-unused-so-the-project-builds-cleanly-without-unused-imports-variables",
+      "title": "Clean up any now-unused styling and code paths related to the removed centered title (including the .gracy-fm-radio-title styling if it becomes unused) so the project builds cleanly without unused imports/variables.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-audiospectrumanalyzer-so-it-reacts-to-the-actual-currently-playing-radio-stream-audio-output-frequency-bars-move-while-audio-is-playing-rather-than-staying-idle",
+      "title": "Fix the AudioSpectrumAnalyzer so it reacts to the actual currently playing radio stream audio output (frequency bars move while audio is playing), rather than staying idle.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restore-the-centered-fm-radio-symbol-sign-in-the-main-display-overlay-the-radio-icon-that-existed-before-the-spectrum-analyzer-replacement-and-ensure-it-is-visible-in-the-center-of-the-screen",
+      "title": "Restore the centered FM radio symbol/sign in the main display overlay (the radio icon that existed before the spectrum analyzer replacement), and ensure it is visible in the center of the screen.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-appcontent-frontend-src-app-tsx-so-the-center-overlay-behavior-is-consistent-with-the-restored-fm-radio-symbol-and-the-analyzer-fix-no-broken-or-unused-center-overlay-code-remains",
+      "title": "Update AppContent (frontend/src/App.tsx) so the center overlay behavior is consistent with the restored FM radio symbol and the analyzer fix (no broken or unused center-overlay code remains).",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -337,6 +410,24 @@
     {
       "id": "AR-2",
       "summary": "Add additional radio stations/channels sourced from Radio Browser tag \"christian\", filtered to Hindi/English languages, integrating into the existing app without affecting previously added stations/channels.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "When stations load, ensure Christian (Jesus/Bible-based) channels are prioritized to appear/load first in the station list.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Find and add Hindi Christian (Indian Christian) radio channels using any provider with a free API (Radio Browser preferred if suitable), integrating them without removing existing stations.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Restore the centered FM radio symbol/sign (revert the center overlay) instead of the audio spectrum analyzer visualization.",
       "reqIds": [],
       "status": "pending"
     }

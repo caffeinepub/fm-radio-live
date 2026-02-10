@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T08:00:06.880Z",
+  "generatedAt": "2026-02-10T12:15:15.827Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,36 +11,43 @@
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-4",
-        "summary": "Fetch additional radio stations from the Radio Browser endpoint for tag \"christian\" and merge them into the app’s existing global station list without removing or altering any previously available stations.",
+        "id": "REQ-13",
+        "summary": "Fix the AudioSpectrumAnalyzer so it reacts to the actual currently playing radio stream audio output (frequency bars move while audio is playing), rather than staying idle.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/AudioPlayer.tsx",
+          "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/AudioPlayer.tsx",
+          "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+          "frontend/src/App.tsx"
         ]
       },
       {
-        "id": "REQ-5",
-        "summary": "Implement resilient fetching for the Christian-tag station feed using the same server failover approach as the existing global station fetch (multiple Radio Browser servers), and apply the same basic station validity checks used by the app (e.g., resolved stream URL present, valid coordinates where required by the globe/pins pipeline).",
+        "id": "REQ-14",
+        "summary": "Restore the centered FM radio symbol/sign in the main display overlay (the radio icon that existed before the spectrum analyzer replacement), and ensure it is visible in the center of the screen.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png",
+          "frontend/src/components/FmRadioCenterOverlay.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/FmRadioCenterOverlay.tsx",
+          "frontend/src/App.tsx"
         ]
       },
       {
-        "id": "REQ-6",
-        "summary": "Ensure the merged station list is cached consistently with the existing multi-layer caching approach so that Christian-tag stations persist across reloads and are included after a station refresh without requiring code changes elsewhere in the UI.",
+        "id": "REQ-15",
+        "summary": "Update AppContent (frontend/src/App.tsx) so the center overlay behavior is consistent with the restored FM radio symbol and the analyzer fix (no broken or unused center-overlay code remains).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/App.tsx"
         ]
       }
     ]
@@ -50,7 +57,10 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AudioPlayer.tsx",
+    "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+    "frontend/src/components/FmRadioCenterOverlay.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

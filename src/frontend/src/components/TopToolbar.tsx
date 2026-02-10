@@ -30,7 +30,7 @@ export default function TopToolbar({ onStationSelect }: TopToolbarProps) {
         
         try {
             setIsRefreshing(true);
-            toast.loading('Refreshing global stations...', { id: 'refresh' });
+            toast.loading('Refreshing stations (Christian channels first)...', { id: 'refresh' });
             
             // Clear all caches
             clearAllCaches();
@@ -41,7 +41,7 @@ export default function TopToolbar({ onStationSelect }: TopToolbarProps) {
             const result = await refetch();
             
             if (result.isSuccess) {
-                toast.success(`✅ ${result.data?.length || 0} global stations loaded!`, { id: 'refresh' });
+                toast.success(`✅ ${result.data?.length || 0} stations loaded (Christian channels prioritized)!`, { id: 'refresh' });
             } else {
                 toast.error('❌ Failed to refresh stations', { id: 'refresh' });
             }
@@ -170,7 +170,7 @@ export default function TopToolbar({ onStationSelect }: TopToolbarProps) {
                                     disabled={isFetching || isRefreshing}
                                     className="p-1 rounded-full hover:bg-blue-500/20 transition-all duration-150 ease-out disabled:opacity-50 hover:scale-110 active:scale-95"
                                     aria-label="Refresh stations"
-                                    title="Refresh station data"
+                                    title="Refresh station data (Christian channels first)"
                                 >
                                     <RefreshCw className={`w-4 h-4 text-blue-400 transition-transform duration-500 ${(isFetching || isRefreshing) ? 'animate-spin' : ''}`} />
                                 </button>

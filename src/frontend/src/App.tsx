@@ -4,13 +4,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from './components/ui/sonner';
 import { toast } from 'sonner';
-import { Radio } from 'lucide-react';
 import { InternetIdentityProvider } from './hooks/useInternetIdentity';
 import LoadingScreen from './components/LoadingScreen';
 import AudioPlayer from './components/AudioPlayer';
 import RadioPlaybackDisplay from './components/RadioPlaybackDisplay';
 import TopToolbar from './components/TopToolbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import AudioSpectrumAnalyzer from './components/AudioSpectrumAnalyzer';
+import FmRadioCenterOverlay from './components/FmRadioCenterOverlay';
 import { useRadioStations, type RadioStation } from './hooks/useQueries';
 
 const SpaceScene = lazy(() => import('./components/SpaceScene'));
@@ -33,6 +34,8 @@ function AppContent() {
     const [selectedStation, setSelectedStation] = useState<RadioStation | null>(null);
     const [userInteracted, setUserInteracted] = useState(false);
     const [autoPlayAttempted, setAutoPlayAttempted] = useState(false);
+    const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+    const [isActuallyPlaying, setIsActuallyPlaying] = useState(false);
     const { data: stations = [], isLoading, refetch } = useRadioStations();
 
     // Lock screen orientation to portrait on mount
@@ -114,6 +117,7 @@ function AppContent() {
 
     const handleClosePlayer = () => {
         setSelectedStation(null);
+        setIsActuallyPlaying(false);
     };
 
     const handleStationSelect = useCallback((station: RadioStation | null) => {
@@ -142,14 +146,28 @@ function AppContent() {
         toast.success(`⏮️ Previous: ${prevStation.name}`, { duration: 2000 });
     }, [selectedStation, stations]);
 
+    const handleAudioElementReady = useCallback((audio: HTMLAudioElement) => {
+        setAudioElement(audio);
+    }, []);
+
+    const handlePlayingStateChange = useCallback((playing: boolean) => {
+        setIsActuallyPlaying(playing);
+    }, []);
+
     return (
         <div className="relative h-screen w-screen overflow-hidden bg-black">
             <TopToolbar onStationSelect={handleStationSelect} />
             
-            {/* Centered Gracy FM Radio Text Logo with FM Radio Icon */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-center gap-3">
-                <h1 className="gracy-fm-radio-title">Gracy FM Radio</h1>
-                <Radio className="w-8 h-8 text-blue-300 opacity-80" strokeWidth={2} />
+            {/* Centered FM Radio Logo Overlay */}
+            <FmRadioCenterOverlay />
+
+            {/* Centered Audio Spectrum Analyzer */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none mt-32">
+                <AudioSpectrumAnalyzer 
+                    audioElement={audioElement} 
+                    isPlaying={isActuallyPlaying}
+                    userInteracted={userInteracted}
+                />
             </div>
 
             <Suspense fallback={<LoadingScreen />}>
@@ -177,6 +195,8 @@ function AppContent() {
                 onClose={handleClosePlayer}
                 onNext={handleNextStation}
                 onPrevious={handlePreviousStation}
+                onAudioElementReady={handleAudioElementReady}
+                onPlayingStateChange={handlePlayingStateChange}
             />
             <PWAInstallPrompt />
             <Toaster />

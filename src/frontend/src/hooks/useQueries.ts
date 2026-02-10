@@ -21,14 +21,15 @@ export interface RadioStation {
     clicktrend: number;
     geo_lat: number | null;
     geo_long: number | null;
+    tags?: string;
 }
 
 // Multi-layer caching configuration optimized for GPRS
-const CACHE_KEY = 'globalfm_global_cache_v6';
-const CACHE_TIMESTAMP_KEY = 'globalfm_global_timestamp_v6';
+const CACHE_KEY = 'globalfm_global_cache_v7';
+const CACHE_TIMESTAMP_KEY = 'globalfm_global_timestamp_v7';
 const CACHE_DURATION = 1000 * 60 * 45; // 45 minutes
 const INDEXEDDB_NAME = 'GlobalFMCache';
-const INDEXEDDB_VERSION = 6;
+const INDEXEDDB_VERSION = 7;
 const STORE_NAME = 'globalStations';
 
 // Memory cache for instant access
@@ -42,9 +43,9 @@ let allStationsLoaded = false;
 let lazyLoadedStations: RadioStation[] = [];
 let consecutiveEmptyBatches = 0;
 
-// Christian stations state
-let christianStationsFetched = false;
-let christianStationsCache: RadioStation[] = [];
+// Hindi Christian stations state
+let hindiChristianStationsFetched = false;
+let hindiChristianStationsCache: RadioStation[] = [];
 
 // Export function to clear all caches
 export function clearAllCaches(): void {
@@ -55,8 +56,8 @@ export function clearAllCaches(): void {
     allStationsLoaded = false;
     lazyLoadedStations = [];
     consecutiveEmptyBatches = 0;
-    christianStationsFetched = false;
-    christianStationsCache = [];
+    hindiChristianStationsFetched = false;
+    hindiChristianStationsCache = [];
     
     try {
         localStorage.removeItem(CACHE_KEY);
@@ -195,7 +196,40 @@ function deduplicateByUUID(stations: RadioStation[]): RadioStation[] {
     return Array.from(uuidMap.values());
 }
 
-// Process stations with validation
+// Heuristic to identify Christian stations
+function isChristianStation(station: RadioStation): boolean {
+    const searchText = `${station.name} ${station.language} ${station.homepage} ${station.tags || ''}`.toLowerCase();
+    
+    const christianKeywords = [
+        'christian', 'christ', 'jesus', 'bible', 'gospel', 'church',
+        'catholic', 'protestant', 'evangelical', 'baptist', 'methodist',
+        'pentecostal', 'worship', 'praise', 'ministry', 'faith',
+        'cross', 'holy', 'blessed', 'prayer', 'scripture'
+    ];
+    
+    return christianKeywords.some(keyword => searchText.includes(keyword));
+}
+
+// Prioritize Christian stations first
+function prioritizeChristianStations(stations: RadioStation[]): RadioStation[] {
+    const christianStations: RadioStation[] = [];
+    const otherStations: RadioStation[] = [];
+    
+    for (const station of stations) {
+        if (isChristianStation(station)) {
+            christianStations.push(station);
+        } else {
+            otherStations.push(station);
+        }
+    }
+    
+    console.log(`✝️ Christian stations: ${christianStations.length}, Other stations: ${otherStations.length}`);
+    
+    // Return Christian stations first, then others
+    return [...christianStations, ...otherStations];
+}
+
+// Process stations with validation and Christian-first ordering
 function processStations(allStations: RadioStation[]): RadioStation[] {
     const validStations = allStations.filter((station: RadioStation) => {
         if (!hasValidCoordinates(station)) {
@@ -221,6 +255,7 @@ function processStations(allStations: RadioStation[]): RadioStation[] {
 
     const deduplicatedStations = deduplicateByCoordinates(validStations);
 
+    // Sort by quality score
     deduplicatedStations.sort((a, b) => {
         const scoreA = a.votes * 2 + a.clickcount + a.bitrate / 10;
         const scoreB = b.votes * 2 + b.clickcount + b.bitrate / 10;
@@ -232,7 +267,10 @@ function processStations(allStations: RadioStation[]): RadioStation[] {
         return scoreB - scoreA;
     });
 
-    return deduplicatedStations;
+    // Apply Christian-first ordering
+    const prioritizedStations = prioritizeChristianStations(deduplicatedStations);
+
+    return prioritizedStations;
 }
 
 // LocalStorage cache management
@@ -320,11 +358,11 @@ async function fetchBatchFromAPI(offset: number, limit: number = 200): Promise<R
     return [];
 }
 
-// Fetch Christian radio stations (Hindi/English) with server failover
-async function fetchChristianStations(): Promise<RadioStation[]> {
-    if (christianStationsFetched && christianStationsCache.length > 0) {
-        console.log(`⚡ Using cached Christian stations (${christianStationsCache.length} stations)`);
-        return christianStationsCache;
+// Fetch Hindi Christian radio stations with server failover
+async function fetchHindiChristianStations(): Promise<RadioStation[]> {
+    if (hindiChristianStationsFetched && hindiChristianStationsCache.length > 0) {
+        console.log(`⚡ Using cached Hindi Christian stations (${hindiChristianStationsCache.length} stations)`);
+        return hindiChristianStationsCache;
     }
 
     const servers = [
@@ -333,63 +371,88 @@ async function fetchChristianStations(): Promise<RadioStation[]> {
         'https://nl1.api.radio-browser.info',
     ];
 
+    const allHindiChristianStations: RadioStation[] = [];
+
+    // Fetch from multiple endpoints to get comprehensive results
+    const searchQueries = [
+        'bytag/christian',
+        'bylanguage/hindi',
+        'byname/christian',
+        'byname/hindi christian',
+        'byname/jesus',
+        'byname/bible'
+    ];
+
     for (const server of servers) {
         try {
-            console.log(`🙏 Fetching Christian stations from ${server}...`);
+            console.log(`🙏 Fetching Hindi Christian stations from ${server}...`);
             
-            const response = await fetch(
-                `${server}/json/stations/bytag/christian`,
-                {
-                    headers: {
-                        'User-Agent': 'GlobalFM/1.0',
-                        'Accept': 'application/json',
-                    },
-                    signal: AbortSignal.timeout(15000), // 15 second timeout
+            for (const query of searchQueries) {
+                try {
+                    const response = await fetch(
+                        `${server}/json/stations/${query}`,
+                        {
+                            headers: {
+                                'User-Agent': 'GlobalFM/1.0',
+                                'Accept': 'application/json',
+                            },
+                            signal: AbortSignal.timeout(15000),
+                        }
+                    );
+
+                    if (response.ok) {
+                        const data: RadioStation[] = await response.json();
+                        if (Array.isArray(data)) {
+                            allHindiChristianStations.push(...data);
+                        }
+                    }
+                } catch (error) {
+                    // Continue with next query
+                    continue;
                 }
-            );
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data: RadioStation[] = await response.json();
-            
-            if (!Array.isArray(data)) {
-                throw new Error('Invalid response format');
+            // If we got results, break out of server loop
+            if (allHindiChristianStations.length > 0) {
+                break;
             }
-
-            // Filter for Hindi & English languages (case-insensitive)
-            const filteredStations = data.filter(station => {
-                const lang = station.language.toLowerCase();
-                return lang.includes('hindi') || lang.includes('english');
-            });
-
-            console.log(`✅ Fetched ${filteredStations.length} Christian stations (Hindi/English) from ${data.length} total`);
-            
-            // Cache the result
-            christianStationsFetched = true;
-            christianStationsCache = filteredStations;
-            
-            return filteredStations;
         } catch (error) {
-            console.warn(`⚠️ Failed to fetch Christian stations from ${server}:`, error);
+            console.warn(`⚠️ Failed to fetch Hindi Christian stations from ${server}:`, error);
             continue;
         }
     }
 
-    console.error('❌ Failed to fetch Christian stations from all servers');
-    return [];
+    // Deduplicate by UUID
+    const uniqueStations = deduplicateByUUID(allHindiChristianStations);
+
+    // Filter for Hindi Christian stations (Hindi language OR Christian keywords)
+    const filteredStations = uniqueStations.filter(station => {
+        const lang = station.language.toLowerCase();
+        const isHindi = lang.includes('hindi');
+        const isChristian = isChristianStation(station);
+        
+        // Include if it's Hindi Christian, or just Christian with good quality
+        return (isHindi && isChristian) || (isChristian && station.votes > 10);
+    });
+
+    console.log(`✅ Fetched ${filteredStations.length} Hindi Christian stations from ${allHindiChristianStations.length} total results`);
+    
+    // Cache the result
+    hindiChristianStationsFetched = true;
+    hindiChristianStationsCache = filteredStations;
+    
+    return filteredStations;
 }
 
-// Merge Christian stations with global stations
-function mergeStations(globalStations: RadioStation[], christianStations: RadioStation[]): RadioStation[] {
+// Merge Hindi Christian stations with global stations
+function mergeStations(globalStations: RadioStation[], hindiChristianStations: RadioStation[]): RadioStation[] {
     // Combine both arrays
-    const combined = [...globalStations, ...christianStations];
+    const combined = [...globalStations, ...hindiChristianStations];
     
     // Deduplicate by stationuuid to avoid duplicates
     const deduplicated = deduplicateByUUID(combined);
     
-    console.log(`🔀 Merged stations: ${globalStations.length} global + ${christianStations.length} Christian = ${deduplicated.length} unique stations`);
+    console.log(`🔀 Merged stations: ${globalStations.length} global + ${hindiChristianStations.length} Hindi Christian = ${deduplicated.length} unique stations`);
     
     return deduplicated;
 }
@@ -415,10 +478,10 @@ async function loadNextBatch(queryClient: any): Promise<void> {
                 console.log(`✅ All global stations loaded (total: ${lazyLoadedStations.length})`);
                 allStationsLoaded = true;
                 
-                // Now fetch Christian stations and merge
+                // Now fetch Hindi Christian stations and merge
                 try {
-                    const christianStations = await fetchChristianStations();
-                    const mergedStations = mergeStations(lazyLoadedStations, christianStations);
+                    const hindiChristianStations = await fetchHindiChristianStations();
+                    const mergedStations = mergeStations(lazyLoadedStations, hindiChristianStations);
                     const processedStations = processStations(mergedStations);
                     
                     // Update all caches with merged data
@@ -428,9 +491,9 @@ async function loadNextBatch(queryClient: any): Promise<void> {
                     setCachedStations(processedStations);
                     await saveToIndexedDB(processedStations);
                     
-                    console.log(`✅ Final merged station count: ${processedStations.length}`);
+                    console.log(`✅ Final merged station count: ${processedStations.length} (Christian stations prioritized first)`);
                 } catch (error) {
-                    console.error('❌ Failed to fetch/merge Christian stations:', error);
+                    console.error('❌ Failed to fetch/merge Hindi Christian stations:', error);
                 }
                 
                 isLoadingBatch = false;
@@ -472,7 +535,7 @@ async function loadNextBatch(queryClient: any): Promise<void> {
         if (currentOffset % 1000 === 0) {
             setCachedStations(processedStations);
             await saveToIndexedDB(processedStations);
-            console.log(`💾 Saved ${processedStations.length} stations to cache`);
+            console.log(`💾 Saved ${processedStations.length} stations to cache (Christian stations prioritized)`);
         }
     } catch (error) {
         console.error('❌ Failed to load batch:', error);
@@ -492,14 +555,14 @@ export function useRadioStations() {
             try {
                 // Layer 1: Memory cache (instant)
                 if (memoryCache && Date.now() - memoryCacheTimestamp < CACHE_DURATION) {
-                    console.log(`⚡ Using memory cache (${memoryCache.length} stations)`);
+                    console.log(`⚡ Using memory cache (${memoryCache.length} stations, Christian-first ordering)`);
                     return memoryCache;
                 }
 
                 // Layer 2: IndexedDB cache
                 const indexedDBCache = await getFromIndexedDB();
                 if (indexedDBCache && indexedDBCache.length > 0) {
-                    console.log(`⚡ Using IndexedDB cache (${indexedDBCache.length} stations)`);
+                    console.log(`⚡ Using IndexedDB cache (${indexedDBCache.length} stations, Christian-first ordering)`);
                     memoryCache = indexedDBCache;
                     memoryCacheTimestamp = Date.now();
                     return indexedDBCache;
@@ -508,7 +571,7 @@ export function useRadioStations() {
                 // Layer 3: LocalStorage cache
                 const localStorageCache = getCachedStations();
                 if (localStorageCache && localStorageCache.length > 0) {
-                    console.log(`⚡ Using localStorage cache (${localStorageCache.length} stations)`);
+                    console.log(`⚡ Using localStorage cache (${localStorageCache.length} stations, Christian-first ordering)`);
                     memoryCache = localStorageCache;
                     memoryCacheTimestamp = Date.now();
                     
@@ -517,144 +580,68 @@ export function useRadioStations() {
                 }
 
                 // Layer 4: Fetch first batch from API
-                console.log('⚡ No cache found, fetching first batch from API...');
-                
-                // Reset lazy loading state
-                currentOffset = 0;
-                isLoadingBatch = false;
-                allStationsLoaded = false;
-                lazyLoadedStations = [];
-                consecutiveEmptyBatches = 0;
-                christianStationsFetched = false;
-                christianStationsCache = [];
-
+                console.log('🌍 Fetching initial batch from Radio Browser API...');
                 const firstBatch = await fetchBatchFromAPI(0, 200);
                 
                 if (firstBatch.length === 0) {
-                    console.error('❌ Failed to fetch first batch');
-                    return [];
+                    throw new Error('Failed to fetch initial batch');
                 }
 
-                // Filter for valid stations with coordinates
-                const validStations = firstBatch.filter(station => 
-                    hasValidCoordinates(station) && 
-                    (station.url_resolved || station.url)
-                );
-
-                console.log(`✅ Loaded ${validStations.length} valid stations from first batch`);
-
-                lazyLoadedStations = validStations;
-                currentOffset = 200;
-
-                const processedStations = processStations(validStations);
+                // Fetch Hindi Christian stations in parallel
+                console.log('🙏 Fetching Hindi Christian stations...');
+                const hindiChristianStations = await fetchHindiChristianStations();
                 
-                // Save to caches
-                setCachedStations(processedStations);
-                await saveToIndexedDB(processedStations);
+                // Merge with first batch
+                const mergedStations = mergeStations(firstBatch, hindiChristianStations);
+                const processedStations = processStations(mergedStations);
+                
+                console.log(`✅ Initial load: ${processedStations.length} stations (Christian stations prioritized first)`);
+
+                // Initialize lazy loading state
+                lazyLoadedStations = [...firstBatch];
+                currentOffset = 200;
+                allStationsLoaded = false;
+                consecutiveEmptyBatches = 0;
+
+                // Update all caches
                 memoryCache = processedStations;
                 memoryCacheTimestamp = Date.now();
-                
+                setCachedStations(processedStations);
+                await saveToIndexedDB(processedStations);
+
                 return processedStations;
-                
             } catch (error) {
-                console.error('❌ Failed to fetch stations:', error);
-                if (memoryCache) return memoryCache;
-                const indexedDBCache = await getFromIndexedDB();
-                if (indexedDBCache) return indexedDBCache;
-                const localStorageCache = getCachedStations();
-                if (localStorageCache) return localStorageCache;
-                return [];
+                console.error('❌ Failed to fetch radio stations:', error);
+                throw error;
             }
         },
         staleTime: CACHE_DURATION,
         gcTime: CACHE_DURATION * 2,
-        retry: 2,
-        retryDelay: 2000,
         refetchOnWindowFocus: false,
-        refetchOnMount: true,
-        refetchOnReconnect: true,
-        placeholderData: () => {
-            if (memoryCache) return memoryCache;
-            const cached = getCachedStations();
-            return cached && cached.length > 0 ? cached : [];
-        },
+        refetchOnMount: false,
+        retry: 2,
     });
 
-    // Set up continuous lazy loading every 3 seconds
+    // Background lazy loading
     useEffect(() => {
-        if (!query.data || query.data.length === 0) {
-            return;
-        }
-
-        // Start lazy loading after initial data is loaded
-        const startLazyLoading = () => {
+        if (query.data && query.data.length > 0 && !allStationsLoaded) {
             if (loadingIntervalRef.current) {
                 clearInterval(loadingIntervalRef.current);
             }
-
-            console.log(`🚀 Starting lazy loading from offset ${currentOffset}`);
 
             loadingIntervalRef.current = setInterval(() => {
-                if (!allStationsLoaded && !isLoadingBatch) {
+                if (!isLoadingBatch && !allStationsLoaded) {
                     loadNextBatch(queryClient);
-                } else if (allStationsLoaded && loadingIntervalRef.current) {
-                    clearInterval(loadingIntervalRef.current);
-                    loadingIntervalRef.current = null;
-                    console.log(`✅ Lazy loading complete - ${lazyLoadedStations.length} total stations loaded`);
-                    
-                    // Final save to cache (already done in loadNextBatch when allStationsLoaded is set)
                 }
-            }, 3000); // Load next batch every 3 seconds
-        };
+            }, 2000);
 
-        // Start lazy loading after a short delay
-        const timeoutId = setTimeout(startLazyLoading, 1000);
-
-        return () => {
-            clearTimeout(timeoutId);
-            if (loadingIntervalRef.current) {
-                clearInterval(loadingIntervalRef.current);
-                loadingIntervalRef.current = null;
-            }
-        };
+            return () => {
+                if (loadingIntervalRef.current) {
+                    clearInterval(loadingIntervalRef.current);
+                }
+            };
+        }
     }, [query.data, queryClient]);
 
     return query;
-}
-
-// Fetch user statistics
-export function useStatsSummary() {
-    const { actor, isFetching } = useActor();
-
-    return useQuery({
-        queryKey: ['statsSummary'],
-        queryFn: async () => {
-            if (!actor) throw new Error('Actor not available');
-            return actor.getAllStatsSummary();
-        },
-        enabled: !!actor && !isFetching,
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        retry: 1,
-    });
-}
-
-// Get caller user profile
-export function useGetCallerUserProfile() {
-    const { actor, isFetching: actorFetching } = useActor();
-
-    const query = useQuery({
-        queryKey: ['currentUserProfile'],
-        queryFn: async () => {
-            if (!actor) throw new Error('Actor not available');
-            return actor.getCallerUserProfile();
-        },
-        enabled: !!actor && !actorFetching,
-        retry: false,
-    });
-
-    return {
-        ...query,
-        isLoading: actorFetching || query.isLoading,
-        isFetched: !!actor && query.isFetched,
-    };
 }

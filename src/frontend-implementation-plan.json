@@ -1,54 +1,75 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Merge Christian (Hindi/English) Radio Browser stations into existing global station list with resilient fetch and caching",
+  "title": "Fix spectrum analyzer audio reactivity and restore centered FM radio symbol overlay",
   "requirements": [
     {
-      "id": "REQ-4",
-      "summary": "Fetch Christian-tag (Hindi/English) stations and merge them into the existing global station list without removing or altering previously available stations.",
+      "id": "REQ-13",
+      "summary": "Make AudioSpectrumAnalyzer reliably connect to the currently playing stream’s audio element and animate in sync with playback while respecting autoplay policies.",
       "acceptanceCriteria": [
-        "When loading stations, the returned list includes all previously available global stations plus additional stations sourced from the \"christian\" tag feed.",
-        "No existing station is removed from the list as a result of adding the new Christian-tag stations (the station count should stay the same or increase, never decrease, given identical upstream data).",
-        "Christian-tag stations are filtered to languages that include \"hindi\" or \"english\" (case-insensitive), matching the user-provided logic.",
-        "The app remains functional with existing features (search, bookmarks, playback, refresh) using the merged station list."
+        "When a station is playing, the spectrum bars visibly animate in sync with audio within 1 second of playback starting.",
+        "When playback is paused/stopped (or no station selected), the analyzer renders an idle state and does not appear frozen.",
+        "The analyzer initialization does not fail due to missing audio element (the analyzer can reliably access the app’s audio element).",
+        "Web Audio initialization respects browser autoplay policies (AudioContext resumes only after a user gesture) and does not spam console errors.",
+        "No regressions to streaming playback (audio still plays reliably with existing reconnection logic)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/AudioPlayer.tsx",
           "operation": "modify",
-          "description": "Extend the station loading pipeline to also fetch the Radio Browser by-tag feed for tag \"christian\", filter stations to languages containing \"hindi\" or \"english\" (case-insensitive), and merge the results into the existing global station list by appending only new stations (dedupe by stationuuid) so no previously available station is removed or replaced."
+          "description": "Refactor audio element handling so the app can reliably share a single HTMLAudioElement instance with other components: render the <audio> element in React (instead of a detached document.createElement) and expose it via a callback/ref prop (e.g., onAudioElementReady). Also expose actual playback state changes (e.g., onIsPlayingChange driven by audio events) so the analyzer can react to real playback rather than just station selection. Preserve existing reconnection logic and event listeners to avoid regressions."
+        },
+        {
+          "path": "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+          "operation": "modify",
+          "description": "Update the analyzer to accept the shared HTMLAudioElement (or a stable accessor) instead of querying by DOM id, and initialize the Web Audio graph only when the audio element is available. Add autoplay-policy-safe AudioContext handling: create the AudioContext/analyser lazily, resume the AudioContext only after a user gesture signal, and avoid repeated resume attempts/log spam when blocked. Ensure the render loop shows an intentional idle state when not playing and animates within 1s once playback is active."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire AudioPlayer and AudioSpectrumAnalyzer together: track and pass down (1) the shared audio element reference and (2) the real isPlaying state from AudioPlayer, and also pass a user-gesture flag (already tracked) to allow safe AudioContext resume behavior. Update the analyzer prop usage so it reflects actual playback and avoids initialization before the audio element exists."
         }
       ]
     },
     {
-      "id": "REQ-5",
-      "summary": "Add server-failover fetching and station validity checks for Christian-tag stations consistent with the existing global station fetch and pin/globe requirements.",
+      "id": "REQ-14",
+      "summary": "Restore a centered FM/radio symbol overlay in the main display, visible in the center and non-interactive, consistent across light/dark themes.",
       "acceptanceCriteria": [
-        "If one Radio Browser server fails, the app attempts alternate servers before giving up on fetching the Christian-tag stations.",
-        "Only stations with a usable stream URL (prefer url_resolved when available; otherwise fall back to url if needed) are added.",
-        "The merged list does not introduce runtime errors in components that assume coordinates exist (e.g., globe/pins)."
+        "The center overlay shows an FM/radio symbol in the middle of the main screen.",
+        "The restored icon overlay does not block user interactions (pointer-events remain non-interactive as appropriate).",
+        "The visual result is consistent in both light/dark themes used by the app."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png",
+          "operation": "create",
+          "description": "Add the FM/radio symbol asset to the app’s static public assets so it can be used by the centered overlay: frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png."
+        },
+        {
+          "path": "frontend/src/components/FmRadioCenterOverlay.tsx",
+          "operation": "create",
+          "description": "Create a small presentational component that renders the FM/radio symbol centered in the screen (using the static asset at frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png), with pointer-events disabled and theme-friendly styling (e.g., opacity/contrast adjustments via Tailwind dark: variants) so it remains visible in both light and dark modes."
+        },
+        {
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Implement a resilient Christian-tag fetch that uses the same multi-server failover list and request hardening (timeout/headers) as the global fetch; apply the same baseline validity expectations used elsewhere (must have valid coordinates via existing validation helper; must have usable stream URL by normalizing to url_resolved when present else url; ensure required fields used by UI like country are present) before merging to avoid runtime errors in station consumers."
+          "description": "Render the restored centered FM/radio symbol overlay in the main display overlay stack (center of the screen) and ensure it remains pointer-events-none so it does not block interactions."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Cache the merged station list using the existing multi-layer caching approach so Christian-tag stations persist across reloads and refreshes.",
+      "id": "REQ-15",
+      "summary": "Update AppContent overlay composition to remove broken/unused center overlay code and keep all existing UI + 3D background working.",
       "acceptanceCriteria": [
-        "After a normal reload (without clearing caches), Christian-tag stations remain present in the station list if they were previously fetched successfully.",
-        "Using the existing Refresh action continues to work and results in a refreshed merged list that still includes Christian-tag stations.",
-        "No new TypeScript/lint errors are introduced by the changes (project builds cleanly)."
+        "frontend/src/App.tsx no longer renders a broken/non-reactive analyzer as the only center overlay.",
+        "TypeScript build passes cleanly with no unused imports/variables introduced by the overlay change.",
+        "The app still renders the 3D background scene and all existing UI elements (TopToolbar, RadioPlaybackDisplay, AudioPlayer, PWAInstallPrompt, Toaster)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update caching write points (memory cache, localStorage, IndexedDB, and React Query cache updates during lazy loading and finalization) to store and serve the merged station list (global + validated Christian-tag additions). Ensure clearAllCaches also resets any in-memory Christian-tag fetch state so the existing Refresh action re-fetches a refreshed merged list without requiring changes elsewhere in the UI."
+          "description": "Cleanly restructure the center overlay area: ensure the FM symbol overlay is present and centered, and ensure the spectrum analyzer overlay uses the new wiring (audio element + true isPlaying) so it is not the only overlay nor broken. Remove any unused imports/variables from prior overlay behavior changes, and verify the existing UI elements (TopToolbar, RadioPlaybackDisplay, AudioPlayer, PWAInstallPrompt, Toaster) and the 3D background Canvas/SpaceScene remain rendered and unaffected."
         }
       ]
     }

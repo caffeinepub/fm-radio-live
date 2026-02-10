@@ -9,9 +9,18 @@ interface AudioPlayerProps {
     onClose?: () => void;
     onNext?: () => void;
     onPrevious?: () => void;
+    onAudioElementReady?: (audio: HTMLAudioElement) => void;
+    onPlayingStateChange?: (isPlaying: boolean) => void;
 }
 
-export default function AudioPlayer({ station, onClose, onNext, onPrevious }: AudioPlayerProps) {
+export default function AudioPlayer({ 
+    station, 
+    onClose, 
+    onNext, 
+    onPrevious,
+    onAudioElementReady,
+    onPlayingStateChange
+}: AudioPlayerProps) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -28,6 +37,13 @@ export default function AudioPlayer({ station, onClose, onNext, onPrevious }: Au
     const isReconnectingRef = useRef(false);
     const currentStationRef = useRef<RadioStation | null>(null);
 
+    // Update parent component when playing state changes
+    useEffect(() => {
+        if (onPlayingStateChange) {
+            onPlayingStateChange(isPlaying);
+        }
+    }, [isPlaying, onPlayingStateChange]);
+
     // Initialize audio element
     useEffect(() => {
         const audio = document.createElement('audio');
@@ -36,6 +52,11 @@ export default function AudioPlayer({ station, onClose, onNext, onPrevious }: Au
         audio.preload = 'none';
         audio.crossOrigin = 'anonymous';
         audioRef.current = audio;
+
+        // Notify parent that audio element is ready
+        if (onAudioElementReady) {
+            onAudioElementReady(audio);
+        }
 
         const handleCanPlay = () => {
             console.log('✅ Stream ready - starting playback');
@@ -88,11 +109,17 @@ export default function AudioPlayer({ station, onClose, onNext, onPrevious }: Au
             isReconnectingRef.current = false;
         };
 
+        const handlePause = () => {
+            console.log('⏸️ Playback paused');
+            setIsPlaying(false);
+        };
+
         audio.addEventListener('canplay', handleCanPlay);
         audio.addEventListener('error', handleError);
         audio.addEventListener('stalled', handleStalled);
         audio.addEventListener('ended', handleEnded);
         audio.addEventListener('playing', handlePlaying);
+        audio.addEventListener('pause', handlePause);
 
         return () => {
             audio.pause();
@@ -102,12 +129,13 @@ export default function AudioPlayer({ station, onClose, onNext, onPrevious }: Au
             audio.removeEventListener('stalled', handleStalled);
             audio.removeEventListener('ended', handleEnded);
             audio.removeEventListener('playing', handlePlaying);
+            audio.removeEventListener('pause', handlePause);
             
             if (retryTimeoutRef.current) {
                 clearTimeout(retryTimeoutRef.current);
             }
         };
-    }, []);
+    }, [onAudioElementReady]);
 
     // Reconnection logic
     const attemptReconnect = () => {
@@ -304,22 +332,17 @@ export default function AudioPlayer({ station, onClose, onNext, onPrevious }: Au
                             onClick={toggleMute}
                             size="icon"
                             variant="ghost"
-                            className="h-9 w-9 rounded-full hover:bg-slate-700/50 transition-all duration-200 flex-shrink-0 hover:scale-105 active:scale-95"
+                            className="h-9 w-9 rounded-full hover:bg-slate-700/50 transition-all duration-200 flex-shrink-0"
                         >
                             {getVolumeIcon()}
                         </Button>
-                        <div className="flex-1 max-w-xs">
-                            <Slider
-                                value={[isMuted ? 0 : volume]}
-                                onValueChange={handleVolumeChange}
-                                max={100}
-                                step={1}
-                                className="w-full cursor-pointer"
-                            />
-                        </div>
-                        <span className="text-sm font-medium text-slate-300 w-11 text-right flex-shrink-0 tabular-nums">
-                            {Math.round(isMuted ? 0 : volume)}%
-                        </span>
+                        <Slider
+                            value={[isMuted ? 0 : volume]}
+                            onValueChange={handleVolumeChange}
+                            max={100}
+                            step={1}
+                            className="flex-1 min-w-0"
+                        />
                     </div>
 
                     {/* Close Button */}
@@ -327,14 +350,14 @@ export default function AudioPlayer({ station, onClose, onNext, onPrevious }: Au
                         onClick={handleClose}
                         size="icon"
                         variant="ghost"
-                        className="h-10 w-10 rounded-full bg-slate-700/50 hover:bg-slate-600/50 transition-all duration-200 flex-shrink-0 hover:scale-105 active:scale-95"
+                        className="h-9 w-9 rounded-full hover:bg-red-500/20 hover:text-red-400 transition-all duration-200 flex-shrink-0"
                     >
                         <X className="w-4 h-4" />
                     </Button>
                 </div>
 
-                {error && retryCountRef.current >= maxRetries && (
-                    <div className="text-xs text-red-400 mt-2 text-center font-medium">
+                {error && (
+                    <div className="mt-2 text-xs text-red-400 text-center">
                         {error}
                     </div>
                 )}

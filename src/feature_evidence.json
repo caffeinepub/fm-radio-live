@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fetch-additional-radio-stations-from-the-radio-browser-endpoint-for-tag-christian-and-merge-them-into-the-app-s-existing-global-station-list-without-removing-or-altering-any-previously-available-stations",
-      "featureTitle": "Fetch additional radio stations from the Radio Browser endpoint for tag \"christian\" and merge them into the app’s existing global station list without removing or altering any previously available stations.",
+      "featureId": "feature-fix-the-audiospectrumanalyzer-so-it-reacts-to-the-actual-currently-playing-radio-stream-audio-output-frequency-bars-move-while-audio-is-playing-rather-than-staying-idle",
+      "featureTitle": "Fix the AudioSpectrumAnalyzer so it reacts to the actual currently playing radio stream audio output (frequency bars move while audio is playing), rather than staying idle.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/App.tsx",
+        "frontend/src/components/AudioPlayer.tsx",
+        "frontend/src/components/AudioSpectrumAnalyzer.tsx"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -17,15 +19,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-4"
+        "REQ-13"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-resilient-fetching-for-the-christian-tag-station-feed-using-the-same-server-failover-approach-as-the-existing-global-station-fetch-multiple-radio-browser-servers-and-apply-the-same-basic-station-validity-checks-used-by-the-app-e-g-resolved-stream-url-present-valid-coordinates-where-required-by-the-globe-pins-pipeline",
-      "featureTitle": "Implement resilient fetching for the Christian-tag station feed using the same server failover approach as the existing global station fetch (multiple Radio Browser servers), and apply the same basic station validity checks used by the app (e.g., resolved stream URL present, valid coordinates where required by the globe/pins pipeline).",
+      "featureId": "feature-restore-the-centered-fm-radio-symbol-sign-in-the-main-display-overlay-the-radio-icon-that-existed-before-the-spectrum-analyzer-replacement-and-ensure-it-is-visible-in-the-center-of-the-screen",
+      "featureTitle": "Restore the centered FM radio symbol/sign in the main display overlay (the radio icon that existed before the spectrum analyzer replacement), and ensure it is visible in the center of the screen.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/App.tsx",
+        "frontend/src/components/FmRadioCenterOverlay.tsx"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -37,15 +40,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-5"
+        "REQ-14"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-merged-station-list-is-cached-consistently-with-the-existing-multi-layer-caching-approach-so-that-christian-tag-stations-persist-across-reloads-and-are-included-after-a-station-refresh-without-requiring-code-changes-elsewhere-in-the-ui",
-      "featureTitle": "Ensure the merged station list is cached consistently with the existing multi-layer caching approach so that Christian-tag stations persist across reloads and are included after a station refresh without requiring code changes elsewhere in the UI.",
+      "featureId": "feature-update-appcontent-frontend-src-app-tsx-so-the-center-overlay-behavior-is-consistent-with-the-restored-fm-radio-symbol-and-the-analyzer-fix-no-broken-or-unused-center-overlay-code-remains",
+      "featureTitle": "Update AppContent (frontend/src/App.tsx) so the center overlay behavior is consistent with the restored FM radio symbol and the analyzer fix (no broken or unused center-overlay code remains).",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -57,7 +60,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-6"
+        "REQ-15"
       ],
       "confidence": "high"
     }
