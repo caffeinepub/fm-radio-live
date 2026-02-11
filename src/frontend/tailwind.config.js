@@ -98,6 +98,26 @@ export default {
           from: { transform: "translateY(0)" },
           to: { transform: "translateY(100%)" },
         },
+        "signal-wave": {
+          "0%": { 
+            transform: "scale(0.5)", 
+            opacity: "0.8" 
+          },
+          "100%": { 
+            transform: "scale(2)", 
+            opacity: "0" 
+          },
+        },
+        "tower-pulse": {
+          "0%, 100%": { 
+            opacity: "1",
+            transform: "scale(1)"
+          },
+          "50%": { 
+            opacity: "0.85",
+            transform: "scale(1.05)"
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -108,6 +128,10 @@ export default {
         "slide-in-from-bottom": "slide-in-from-bottom 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
         "slide-out-to-top": "slide-out-to-top 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
         "slide-out-to-bottom": "slide-out-to-bottom 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
+        "signal-wave-1": "signal-wave 2s ease-out infinite",
+        "signal-wave-2": "signal-wave 2s ease-out infinite 0.4s",
+        "signal-wave-3": "signal-wave 2s ease-out infinite 0.8s",
+        "tower-pulse": "tower-pulse 3s ease-in-out infinite",
       },
       transitionDuration: {
         DEFAULT: '150ms',

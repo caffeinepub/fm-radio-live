@@ -1,74 +1,92 @@
 {
   "kind": "build_request",
-  "title": "Fix audio spectrum analyzer reactivity and restore centered FM radio symbol",
-  "priority": "high",
+  "title": "Center the spectrum analyzer and replace the FM logo with an animated radio-tower symbol",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-13",
-      "text": "Fix the AudioSpectrumAnalyzer so it reacts to the actual currently playing radio stream audio output (frequency bars move while audio is playing), rather than staying idle.",
+      "id": "REQ-16",
+      "text": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-7"
         ],
         "quotes": [
-          "Audio spectrum analyser is not working according to audio, not Even any reaction."
+          "Shift the audio spectrum analyzer to the middle of the screen from the bottom."
         ]
       },
       "acceptanceCriteria": [
-        "When a station is playing, the spectrum bars visibly animate in sync with audio within 1 second of playback starting.",
-        "When playback is paused/stopped (or no station selected), the analyzer renders an idle state and does not appear frozen.",
-        "The analyzer initialization does not fail due to missing audio element (the analyzer can reliably access the app’s audio element).",
-        "Web Audio initialization respects browser autoplay policies (AudioContext resumes only after a user gesture) and does not spam console errors.",
-        "No regressions to streaming playback (audio still plays reliably with existing reconnection logic)."
+        "On common mobile viewport sizes, the spectrum analyzer renders centered in the screen (not near the bottom).",
+        "The analyzer remains non-interactive (pointer-events do not block interactions with other UI).",
+        "No layout regressions occur for TopToolbar, playback display, or audio player UI."
       ]
     },
     {
-      "id": "REQ-14",
-      "text": "Restore the centered FM radio symbol/sign in the main display overlay (the radio icon that existed before the spectrum analyzer replacement), and ensure it is visible in the center of the screen.",
+      "id": "REQ-17",
+      "text": "Remove the centered FM logo overlay from the main display (stop rendering the existing FmRadioCenterOverlay and ensure the FM logo image is no longer shown in the center of the screen).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-7"
         ],
         "quotes": [
-          "Kindly place back FM radio symbol Sign"
+          "Remove the FM logo and replace it with only a radio tower symbol and place it above the spectrum analyser."
         ]
       },
       "acceptanceCriteria": [
-        "The center overlay shows an FM/radio symbol in the middle of the main screen.",
-        "The restored icon overlay does not block user interactions (pointer-events remain non-interactive as appropriate).",
-        "The visual result is consistent in both light/dark themes used by the app."
+        "The FM logo image is not visible anywhere in the centered main display overlay area during normal app usage.",
+        "No unused imports/components remain related to the removed centered FM overlay (project builds cleanly without unused-variable/type errors)."
       ]
     },
     {
-      "id": "REQ-15",
-      "text": "Update AppContent (frontend/src/App.tsx) so the center overlay behavior is consistent with the restored FM radio symbol and the analyzer fix (no broken or unused center-overlay code remains).",
+      "id": "REQ-18",
+      "text": "Add a centered radio-tower symbol with animated signal waves and place it directly above the centered AudioSpectrumAnalyzer, aligned to the same center axis.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-9"
         ],
         "quotes": [
-          "Kindly place back FM radio symbol Sign"
+          "Tower with animated signal waves"
         ]
       },
       "acceptanceCriteria": [
-        "frontend/src/App.tsx no longer renders a broken/non-reactive analyzer as the only center overlay.",
-        "TypeScript build passes cleanly with no unused imports/variables introduced by the overlay change.",
-        "The app still renders the 3D background scene and all existing UI elements (TopToolbar, RadioPlaybackDisplay, AudioPlayer, PWAInstallPrompt, Toaster)."
+        "A radio-tower symbol is visible above the spectrum analyzer in the center of the screen.",
+        "The symbol includes animated signal waves (continuous, clearly noticeable animation).",
+        "The tower + waves animation performs smoothly and does not noticeably degrade rendering performance on mobile devices.",
+        "The tower symbol does not intercept pointer events (pointer-events: none)."
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "text": "Update the center-overlay composition in frontend/src/App.tsx so the radio-tower symbol and the AudioSpectrumAnalyzer are arranged as a single centered vertical stack (tower above analyzer), and remove any now-obsolete center-overlay code paths.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7",
+          "msg-9"
+        ],
+        "quotes": [
+          "Shift the audio spectrum analyzer to the middle of the screen from the bottom.",
+          "Tower with animated signal waves"
+        ]
+      },
+      "acceptanceCriteria": [
+        "frontend/src/App.tsx uses a single centered container for the tower-above-analyzer layout.",
+        "The analyzer remains connected to the current audio element and continues to render as before, only repositioned.",
+        "No broken/unused center overlay components remain referenced by AppContent."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/components/ui (shadcn/ui) since they are read-only and must be composed, not edited.",
-    "Do not edit immutable hook files: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
-    "Backend must remain a single Motoko actor; no additional backend services."
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Do not introduce additional backend services or databases; keep changes in the existing React + TypeScript frontend.",
+    "Keep the Internet Computer single-actor backend architecture unchanged (no backend changes required for this request)."
   ],
   "nonGoals": [
-    "Adding new backend APIs or changing Motoko stable state for this task.",
-    "Adding new third-party audio/visualization libraries; use existing Web Audio + canvas approach already in the codebase.",
-    "Changing station fetching, caching, or Christian/Hindi station prioritization behavior."
+    "Changing station fetching, caching, or prioritization behavior.",
+    "Changing audio playback/reconnection behavior beyond what is necessary to reposition overlays.",
+    "Adding new authentication providers or third-party integrations."
   ],
   "imageRequirements": {
     "required": [],

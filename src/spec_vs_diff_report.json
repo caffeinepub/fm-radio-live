@@ -1,21 +1,30 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T12:15:15.824Z",
-  "summary": "Diff adds a new centered FM radio logo overlay component, refactors App.tsx to track user interaction/playing state and capture a created audio element from AudioPlayer, and updates AudioSpectrumAnalyzer to accept the audio element + playing state and initialize a Web Audio analyser for visualization. Some additional behavior (orientation locking, interaction logging, autoplay-first-station logic) appears added but was not requested.",
+  "generatedAt": "2026-02-11T15:26:44.390Z",
+  "summary": "Diff adds a new RadioTowerOverlay with animated signal waves and updates App.tsx to import/use it alongside AudioSpectrumAnalyzer, but the provided truncation does not clearly show the new centered stacking container or confirm the FM logo overlay removal/cleanup and analyzer centering changes. An unrelated screen-orientation-lock behavior appears to have been introduced in App.tsx.",
   "missing_requirements": [
     {
-      "id": "REQ-13",
-      "requirement": "Spectrum bars animate in sync with audio within 1 second of playback starting; analyzer reliably initializes and resumes AudioContext only after a user gesture without spamming console errors.",
-      "reason": "AudioSpectrumAnalyzer includes init/resume helpers and idle-state rendering, but the diff is truncated before showing when/if initAudio() and resumeAudioContext() are invoked and whether initialization is gated to a user gesture to avoid autoplay-policy errors; therefore the AC cannot be verified from the provided diff summary.",
+      "id": "REQ-16",
+      "requirement": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene; keep it non-interactive (pointer-events) and avoid layout regressions.",
+      "reason": "The diff summary does not include the specific layout/container CSS/classes (or any removed offsets) that would demonstrate the analyzer was re-centered vertically (especially on mobile) and kept pointer-events non-interactive. App.tsx is truncated before any overlay layout markup is shown.",
       "evidence": [
-        "frontend/src/components/AudioSpectrumAnalyzer.tsx (truncated)"
+        "frontend/src/App.tsx (truncated)"
       ]
     },
     {
-      "id": "REQ-15",
-      "requirement": "AppContent center overlay behavior is updated cleanly (no broken/unused overlay code; no unused imports/variables; TS build passes cleanly).",
-      "reason": "App.tsx changes are truncated; while new imports for AudioSpectrumAnalyzer and FmRadioCenterOverlay are shown, the rendered JSX and final usage (and whether any unused imports/variables remain) cannot be confirmed from the provided excerpt.",
+      "id": "REQ-17",
+      "requirement": "Remove the centered FM logo overlay (stop rendering FmRadioCenterOverlay; ensure FM logo image no longer shown; remove unused imports/components).",
+      "reason": "While App.tsx no longer shows an import of FmRadioCenterOverlay in the visible portion, the diff does not show the relevant render section (truncated) nor the actual changes inside FmRadioCenterOverlay.tsx (only that it was modified). Therefore, it cannot be confirmed that the FM logo is no longer rendered and that related code paths/imports were fully removed/cleaned.",
+      "evidence": [
+        "frontend/src/App.tsx (truncated)",
+        "frontend/src/components/FmRadioCenterOverlay.tsx (modified, content not shown)"
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "requirement": "Update center-overlay composition in frontend/src/App.tsx so radio-tower symbol and AudioSpectrumAnalyzer are arranged as a single centered vertical stack, and remove obsolete center-overlay code paths.",
+      "reason": "App.tsx is truncated before the JSX for the center overlay is shown, so the presence of a single centered container, a vertical stack (tower above analyzer), and removal of obsolete overlay code paths cannot be directly verified from the provided diff excerpt.",
       "evidence": [
         "frontend/src/App.tsx (truncated)"
       ]
@@ -23,41 +32,20 @@
   ],
   "hallucinated_features": [
     {
-      "description": "Screen orientation lock to portrait and prevention of orientation changes.",
-      "reason": "Not requested by REQ-13/14/15; appears newly added in App.tsx.",
+      "description": "Screen orientation lock to portrait plus orientationchange prevention logic added to AppContent.",
+      "reason": "Not requested by any requirement (REQ-16..REQ-19 are about centering overlays and replacing the logo), and it changes runtime behavior beyond repositioning overlays.",
       "evidence": [
-        "frontend/src/App.tsx (truncated)"
-      ]
-    },
-    {
-      "description": "Global user-interaction tracking with console logging (including emoji log) unrelated to the requested overlay/analyzer changes.",
-      "reason": "While a user gesture is relevant to AudioContext resume, the added global listeners and logging are not explicitly requested as part of REQ-13/14/15 and may be extraneous.",
-      "evidence": [
-        "frontend/src/App.tsx (truncated)"
-      ]
-    },
-    {
-      "description": "Auto-play first station after user interaction.",
-      "reason": "Not requested; BuildRequest explicitly focuses on analyzer reactivity and restoring the centered FM symbol without changing station behavior.",
-      "evidence": [
-        "frontend/src/App.tsx (truncated)"
-      ]
-    },
-    {
-      "description": "Documentation/summary claims of extensive 3D scene, Earth rendering, UI styling, and pin behavior enhancements.",
-      "reason": "These enhancements are not requested in REQ-13/14/15; they appear in frontend-file-summaries.txt despite not being part of the BuildRequest scope.",
-      "evidence": [
-        "frontend-file-summaries.txt (truncated)"
+        "frontend/src/App.tsx (shows useEffect that calls screen.orientation.lock('portrait') and adds an orientationchange listener)"
       ]
     }
   ],
-  "confidence": 0.55,
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/AudioPlayer.tsx",
-    "frontend/src/components/AudioSpectrumAnalyzer.tsx",
     "frontend/src/components/FmRadioCenterOverlay.tsx",
+    "frontend/src/components/RadioTowerOverlay.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

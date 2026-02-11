@@ -2,12 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-audiospectrumanalyzer-so-it-reacts-to-the-actual-currently-playing-radio-stream-audio-output-frequency-bars-move-while-audio-is-playing-rather-than-staying-idle",
-      "featureTitle": "Fix the AudioSpectrumAnalyzer so it reacts to the actual currently playing radio stream audio output (frequency bars move while audio is playing), rather than staying idle.",
+      "featureId": "feature-move-the-audiospectrumanalyzer-overlay-so-it-is-visually-centered-in-the-middle-of-the-screen-remove-any-extra-offset-that-pushes-it-downward-while-keeping-it-centered-horizontally-and-vertically-above-the-3d-scene",
+      "featureTitle": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/AudioPlayer.tsx",
-        "frontend/src/components/AudioSpectrumAnalyzer.tsx"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -19,13 +17,13 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-13"
+        "REQ-16"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-restore-the-centered-fm-radio-symbol-sign-in-the-main-display-overlay-the-radio-icon-that-existed-before-the-spectrum-analyzer-replacement-and-ensure-it-is-visible-in-the-center-of-the-screen",
-      "featureTitle": "Restore the centered FM radio symbol/sign in the main display overlay (the radio icon that existed before the spectrum analyzer replacement), and ensure it is visible in the center of the screen.",
+      "featureId": "feature-remove-the-centered-fm-logo-overlay-from-the-main-display-stop-rendering-the-existing-fmradiocenteroverlay-and-ensure-the-fm-logo-image-is-no-longer-shown-in-the-center-of-the-screen",
+      "featureTitle": "Remove the centered FM logo overlay from the main display (stop rendering the existing FmRadioCenterOverlay and ensure the FM logo image is no longer shown in the center of the screen).",
       "files": [
         "frontend/src/App.tsx",
         "frontend/src/components/FmRadioCenterOverlay.tsx"
@@ -40,13 +38,34 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-14"
+        "REQ-17"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-appcontent-frontend-src-app-tsx-so-the-center-overlay-behavior-is-consistent-with-the-restored-fm-radio-symbol-and-the-analyzer-fix-no-broken-or-unused-center-overlay-code-remains",
-      "featureTitle": "Update AppContent (frontend/src/App.tsx) so the center overlay behavior is consistent with the restored FM radio symbol and the analyzer fix (no broken or unused center-overlay code remains).",
+      "featureId": "feature-add-a-centered-radio-tower-symbol-with-animated-signal-waves-and-place-it-directly-above-the-centered-audiospectrumanalyzer-aligned-to-the-same-center-axis",
+      "featureTitle": "Add a centered radio-tower symbol with animated signal waves and place it directly above the centered AudioSpectrumAnalyzer, aligned to the same center axis.",
+      "files": [
+        "frontend/src/components/RadioTowerOverlay.tsx",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "authorization@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-18"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-center-overlay-composition-in-frontend-src-app-tsx-so-the-radio-tower-symbol-and-the-audiospectrumanalyzer-are-arranged-as-a-single-centered-vertical-stack-tower-above-analyzer-and-remove-any-now-obsolete-center-overlay-code-paths",
+      "featureTitle": "Update the center-overlay composition in frontend/src/App.tsx so the radio-tower symbol and the AudioSpectrumAnalyzer are arranged as a single centered vertical stack (tower above analyzer), and remove any now-obsolete center-overlay code paths.",
       "files": [
         "frontend/src/App.tsx"
       ],
@@ -60,7 +79,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-15"
+        "REQ-19"
       ],
       "confidence": "high"
     }

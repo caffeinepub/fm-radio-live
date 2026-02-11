@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Make the audio spectrum analyzer react to the currently playing radio stream and restore the centered FM radio symbol overlay.
+**Goal:** Center the AudioSpectrumAnalyzer overlay and replace the centered FM logo overlay with a radio-tower symbol that has animated signal waves above the analyzer.
 
 **Planned changes:**
-- Fix `AudioSpectrumAnalyzer` so it connects to the app’s active audio output and animates frequency bars during playback, while showing a clear idle state when not playing.
-- Ensure Web Audio initialization works reliably with the app’s audio element and respects autoplay/user-gesture requirements without producing console-error spam.
-- Restore the centered FM/radio symbol overlay in the main display and ensure it remains visible, non-interactive (doesn’t block clicks), and consistent across light/dark themes.
-- Update `frontend/src/App.tsx` center-overlay logic to match the restored FM symbol + analyzer behavior, removing broken/unused overlay code and keeping existing UI/3D scene intact.
+- Reposition the AudioSpectrumAnalyzer overlay to be visually centered on common mobile viewports (remove downward offset) while keeping it non-interactive.
+- Remove the centered FM logo overlay from the main display so it is no longer rendered or visible.
+- Add a centered radio-tower symbol with continuously animated signal waves, positioned directly above the centered analyzer and aligned on the same center axis; ensure it does not intercept pointer events.
+- Update `frontend/src/App.tsx` center-overlay layout to a single centered vertical stack (tower above analyzer) and remove obsolete center-overlay code paths/imports.
 
-**User-visible outcome:** When a station plays, the spectrum bars animate in sync with the audio; when not playing, the analyzer displays an idle state. The FM radio symbol is visible again in the center overlay without interfering with interactions.
+**User-visible outcome:** The spectrum analyzer appears centered on screen, with an animated radio-tower symbol and signal waves directly above it, and the previous centered FM logo no longer appears.

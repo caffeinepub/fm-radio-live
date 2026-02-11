@@ -1,47 +1,55 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-10T12:15:15.827Z",
+  "generatedAt": "2026-02-11T15:26:44.394Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-13",
-        "summary": "Fix the AudioSpectrumAnalyzer so it reacts to the actual currently playing radio stream audio output (frequency bars move while audio is playing), rather than staying idle.",
+        "id": "REQ-16",
+        "summary": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/AudioPlayer.tsx",
-          "frontend/src/components/AudioSpectrumAnalyzer.tsx",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/AudioPlayer.tsx",
-          "frontend/src/components/AudioSpectrumAnalyzer.tsx",
           "frontend/src/App.tsx"
         ]
       },
       {
-        "id": "REQ-14",
-        "summary": "Restore the centered FM radio symbol/sign in the main display overlay (the radio icon that existed before the spectrum analyzer replacement), and ensure it is visible in the center of the screen.",
+        "id": "REQ-17",
+        "summary": "Remove the centered FM logo overlay from the main display (stop rendering the existing FmRadioCenterOverlay and ensure the FM logo image is no longer shown in the center of the screen).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png",
-          "frontend/src/components/FmRadioCenterOverlay.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/components/FmRadioCenterOverlay.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/FmRadioCenterOverlay.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/components/FmRadioCenterOverlay.tsx"
         ]
       },
       {
-        "id": "REQ-15",
-        "summary": "Update AppContent (frontend/src/App.tsx) so the center overlay behavior is consistent with the restored FM radio symbol and the analyzer fix (no broken or unused center-overlay code remains).",
+        "id": "REQ-18",
+        "summary": "Add a centered radio-tower symbol with animated signal waves and place it directly above the centered AudioSpectrumAnalyzer, aligned to the same center axis.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/RadioTowerOverlay.tsx",
+          "frontend/tailwind.config.js"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/RadioTowerOverlay.tsx",
+          "frontend/tailwind.config.js"
+        ]
+      },
+      {
+        "id": "REQ-19",
+        "summary": "Update the center-overlay composition in frontend/src/App.tsx so the radio-tower symbol and the AudioSpectrumAnalyzer are arranged as a single centered vertical stack (tower above analyzer), and remove any now-obsolete center-overlay code paths.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx"
@@ -58,9 +66,9 @@
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
-    "frontend/src/components/AudioPlayer.tsx",
-    "frontend/src/components/AudioSpectrumAnalyzer.tsx",
     "frontend/src/components/FmRadioCenterOverlay.tsx",
+    "frontend/src/components/RadioTowerOverlay.tsx",
+    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

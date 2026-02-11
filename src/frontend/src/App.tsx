@@ -11,7 +11,7 @@ import RadioPlaybackDisplay from './components/RadioPlaybackDisplay';
 import TopToolbar from './components/TopToolbar';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import AudioSpectrumAnalyzer from './components/AudioSpectrumAnalyzer';
-import FmRadioCenterOverlay from './components/FmRadioCenterOverlay';
+import RadioTowerOverlay from './components/RadioTowerOverlay';
 import { useRadioStations, type RadioStation } from './hooks/useQueries';
 
 const SpaceScene = lazy(() => import('./components/SpaceScene'));
@@ -158,11 +158,9 @@ function AppContent() {
         <div className="relative h-screen w-screen overflow-hidden bg-black">
             <TopToolbar onStationSelect={handleStationSelect} />
             
-            {/* Centered FM Radio Logo Overlay */}
-            <FmRadioCenterOverlay />
-
-            {/* Centered Audio Spectrum Analyzer */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none mt-32">
+            {/* Centered Radio Tower and Spectrum Analyzer */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-center gap-6">
+                <RadioTowerOverlay />
                 <AudioSpectrumAnalyzer 
                     audioElement={audioElement} 
                     isPlaying={isActuallyPlaying}

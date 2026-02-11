@@ -1,75 +1,79 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix spectrum analyzer audio reactivity and restore centered FM radio symbol overlay",
+  "title": "Center the spectrum analyzer and replace FM logo with animated radio-tower overlay",
   "requirements": [
     {
-      "id": "REQ-13",
-      "summary": "Make AudioSpectrumAnalyzer reliably connect to the currently playing stream’s audio element and animate in sync with playback while respecting autoplay policies.",
+      "id": "REQ-16",
+      "summary": "Reposition the AudioSpectrumAnalyzer overlay to be visually centered on screen (remove downward offset) while remaining non-interactive.",
       "acceptanceCriteria": [
-        "When a station is playing, the spectrum bars visibly animate in sync with audio within 1 second of playback starting.",
-        "When playback is paused/stopped (or no station selected), the analyzer renders an idle state and does not appear frozen.",
-        "The analyzer initialization does not fail due to missing audio element (the analyzer can reliably access the app’s audio element).",
-        "Web Audio initialization respects browser autoplay policies (AudioContext resumes only after a user gesture) and does not spam console errors.",
-        "No regressions to streaming playback (audio still plays reliably with existing reconnection logic)."
+        "On common mobile viewport sizes, the spectrum analyzer renders centered in the screen (not near the bottom).",
+        "The analyzer remains non-interactive (pointer-events do not block interactions with other UI).",
+        "No layout regressions occur for TopToolbar, playback display, or audio player UI."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/AudioPlayer.tsx",
-          "operation": "modify",
-          "description": "Refactor audio element handling so the app can reliably share a single HTMLAudioElement instance with other components: render the <audio> element in React (instead of a detached document.createElement) and expose it via a callback/ref prop (e.g., onAudioElementReady). Also expose actual playback state changes (e.g., onIsPlayingChange driven by audio events) so the analyzer can react to real playback rather than just station selection. Preserve existing reconnection logic and event listeners to avoid regressions."
-        },
-        {
-          "path": "frontend/src/components/AudioSpectrumAnalyzer.tsx",
-          "operation": "modify",
-          "description": "Update the analyzer to accept the shared HTMLAudioElement (or a stable accessor) instead of querying by DOM id, and initialize the Web Audio graph only when the audio element is available. Add autoplay-policy-safe AudioContext handling: create the AudioContext/analyser lazily, resume the AudioContext only after a user gesture signal, and avoid repeated resume attempts/log spam when blocked. Ensure the render loop shows an intentional idle state when not playing and animates within 1s once playback is active."
-        },
-        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire AudioPlayer and AudioSpectrumAnalyzer together: track and pass down (1) the shared audio element reference and (2) the real isPlaying state from AudioPlayer, and also pass a user-gesture flag (already tracked) to allow safe AudioContext resume behavior. Update the analyzer prop usage so it reflects actual playback and avoids initialization before the audio element exists."
+          "description": "Adjust the center-overlay container styling to remove the extra downward offset (e.g., eliminate the current margin-top) while keeping the analyzer centered via absolute positioning and transforms; ensure the overlay wrapper remains pointer-events-none and does not affect TopToolbar/RadioPlaybackDisplay/AudioPlayer layout."
         }
       ]
     },
     {
-      "id": "REQ-14",
-      "summary": "Restore a centered FM/radio symbol overlay in the main display, visible in the center and non-interactive, consistent across light/dark themes.",
+      "id": "REQ-17",
+      "summary": "Remove the centered FM logo overlay from the main display and clean up related references.",
       "acceptanceCriteria": [
-        "The center overlay shows an FM/radio symbol in the middle of the main screen.",
-        "The restored icon overlay does not block user interactions (pointer-events remain non-interactive as appropriate).",
-        "The visual result is consistent in both light/dark themes used by the app."
+        "The FM logo image is not visible anywhere in the centered main display overlay area during normal app usage.",
+        "No unused imports/components remain related to the removed centered FM overlay (project builds cleanly without unused-variable/type errors)."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png",
-          "operation": "create",
-          "description": "Add the FM/radio symbol asset to the app’s static public assets so it can be used by the centered overlay: frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png."
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Stop rendering the existing centered FM overlay by removing the FmRadioCenterOverlay import and JSX usage, ensuring there are no remaining references."
         },
         {
           "path": "frontend/src/components/FmRadioCenterOverlay.tsx",
-          "operation": "create",
-          "description": "Create a small presentational component that renders the FM/radio symbol centered in the screen (using the static asset at frontend/public/assets/generated/fm-radio-official-logo-transparent.dim_400x200.png), with pointer-events disabled and theme-friendly styling (e.g., opacity/contrast adjustments via Tailwind dark: variants) so it remains visible in both light and dark modes."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Render the restored centered FM/radio symbol overlay in the main display overlay stack (center of the screen) and ensure it remains pointer-events-none so it does not block interactions."
+          "operation": "delete",
+          "description": "Delete the obsolete centered FM overlay component so the FM logo image is no longer used and no dead code remains."
         }
       ]
     },
     {
-      "id": "REQ-15",
-      "summary": "Update AppContent overlay composition to remove broken/unused center overlay code and keep all existing UI + 3D background working.",
+      "id": "REQ-18",
+      "summary": "Add a centered animated radio-tower symbol with signal waves above the spectrum analyzer, aligned to the same center axis and non-interactive.",
       "acceptanceCriteria": [
-        "frontend/src/App.tsx no longer renders a broken/non-reactive analyzer as the only center overlay.",
-        "TypeScript build passes cleanly with no unused imports/variables introduced by the overlay change.",
-        "The app still renders the 3D background scene and all existing UI elements (TopToolbar, RadioPlaybackDisplay, AudioPlayer, PWAInstallPrompt, Toaster)."
+        "A radio-tower symbol is visible above the spectrum analyzer in the center of the screen.",
+        "The symbol includes animated signal waves (continuous, clearly noticeable animation).",
+        "The tower + waves animation performs smoothly and does not noticeably degrade rendering performance on mobile devices.",
+        "The tower symbol does not intercept pointer events (pointer-events: none)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/RadioTowerOverlay.tsx",
+          "operation": "create",
+          "description": "Create a lightweight React component that renders a radio-tower symbol (prefer SVG or simple divs) with animated signal waves using transform/opacity animations; ensure the root is pointer-events-none and is sized appropriately for mobile."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Extend Tailwind animations/keyframes to support smooth, GPU-friendly signal-wave and subtle tower pulse animations (transform/opacity only) that can be applied by RadioTowerOverlay."
+        }
+      ]
+    },
+    {
+      "id": "REQ-19",
+      "summary": "Update App center-overlay composition to a single centered vertical stack (tower above analyzer) and remove obsolete center-overlay code paths.",
+      "acceptanceCriteria": [
+        "frontend/src/App.tsx uses a single centered container for the tower-above-analyzer layout.",
+        "The analyzer remains connected to the current audio element and continues to render as before, only repositioned.",
+        "No broken/unused center overlay components remain referenced by AppContent."
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Cleanly restructure the center overlay area: ensure the FM symbol overlay is present and centered, and ensure the spectrum analyzer overlay uses the new wiring (audio element + true isPlaying) so it is not the only overlay nor broken. Remove any unused imports/variables from prior overlay behavior changes, and verify the existing UI elements (TopToolbar, RadioPlaybackDisplay, AudioPlayer, PWAInstallPrompt, Toaster) and the 3D background Canvas/SpaceScene remain rendered and unaffected."
+          "description": "Refactor the center overlay into one absolute, screen-centered container that renders a vertical stack: RadioTowerOverlay above AudioSpectrumAnalyzer; keep pointer-events-none on the container, preserve the analyzer props wiring (audioElement/isPlaying/userInteracted), and remove any now-obsolete centered overlay JSX."
         }
       ]
     }
