@@ -1,79 +1,83 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Center the spectrum analyzer and replace FM logo with animated radio-tower overlay",
+  "title": "Guest dashboard + persistent guest bookmarks + 10-bar edge-to-edge spectrum analyzer",
   "requirements": [
     {
-      "id": "REQ-16",
-      "summary": "Reposition the AudioSpectrumAnalyzer overlay to be visually centered on screen (remove downward offset) while remaining non-interactive.",
+      "id": "REQ-27",
+      "summary": "Update AudioSpectrumAnalyzer to a maximum of 10 total mirrored bars and compute dynamic bar/gap sizing to fill the full canvas width edge-to-edge while keeping center-out mirrored grayscale styling.",
       "acceptanceCriteria": [
-        "On common mobile viewport sizes, the spectrum analyzer renders centered in the screen (not near the bottom).",
-        "The analyzer remains non-interactive (pointer-events do not block interactions with other UI).",
-        "No layout regressions occur for TopToolbar, playback display, or audio player UI."
+        "When audio is playing, the spectrum analyzer shows no more than 10 bars total, symmetrically mirrored from the center axis.",
+        "Bar width is visibly reduced compared to the current implementation, and spacing is computed dynamically so the full set of mirrored bars spans the entire canvas width edge-to-edge (no 95% width or similar padding).",
+        "The analyzer remains grayscale-only (no color palettes, glow, or gradients)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/AudioSpectrumAnalyzer.tsx",
           "operation": "modify",
-          "description": "Adjust the center-overlay container styling to remove the extra downward offset (e.g., eliminate the current margin-top) while keeping the analyzer centered via absolute positioning and transforms; ensure the overlay wrapper remains pointer-events-none and does not affect TopToolbar/RadioPlaybackDisplay/AudioPlayer layout."
+          "description": "Adjust the spectrum rendering math to draw exactly 5 bars per side (10 total), reduce individual bar width, and compute bar width + inter-bar gap so that the outermost left/right bars align with the canvas edges (no intentional horizontal padding) while preserving the existing mirrored-from-center layout and grayscale-only fill styles."
         }
       ]
     },
     {
-      "id": "REQ-17",
-      "summary": "Remove the centered FM logo overlay from the main display and clean up related references.",
+      "id": "REQ-28",
+      "summary": "Fix AudioSpectrumAnalyzer resize behavior to avoid cumulative canvas context scaling and keep animation smooth on initial load and window resizes.",
       "acceptanceCriteria": [
-        "The FM logo image is not visible anywhere in the centered main display overlay area during normal app usage.",
-        "No unused imports/components remain related to the removed centered FM overlay (project builds cleanly without unused-variable/type errors)."
+        "Resizing the window does not cause the bars to become stretched/compressed incorrectly or progressively scaled due to repeated ctx.scale calls.",
+        "The analyzer continues rendering smoothly (no flicker/jitter introduced by resizing)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/AudioSpectrumAnalyzer.tsx",
           "operation": "modify",
-          "description": "Stop rendering the existing centered FM overlay by removing the FmRadioCenterOverlay import and JSX usage, ensuring there are no remaining references."
+          "description": "Update the responsive canvas sizing logic to reset the 2D context transform before applying devicePixelRatio scaling (e.g., using setTransform/resetTransform) so repeated resizes do not compound scaling; ensure the animation loop remains stable and continues to render smoothly after resize."
+        }
+      ]
+    },
+    {
+      "id": "REQ-29",
+      "summary": "Allow guest (unauthenticated) users to open and use the User Dashboard overlay in a local-only, limited mode instead of blocking behind Internet Identity login.",
+      "acceptanceCriteria": [
+        "Clicking the Dashboard button opens the User Dashboard even when not logged in.",
+        "Dashboard contents for guests are limited to locally available information (e.g., local bookmarks and station-derived counts) and do not require any authenticated backend calls.",
+        "Any existing authenticated-only actions (if present elsewhere) remain protected and continue to require Internet Identity."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/TopToolbar.tsx",
+          "operation": "modify",
+          "description": "Remove the authentication gating for opening the dashboard: always allow the Dashboard button to open the overlay for guests, and pass an explicit authentication/guest flag to the dashboard as needed for guest-mode UI messaging while keeping login/logout behavior unchanged."
         },
         {
-          "path": "frontend/src/components/FmRadioCenterOverlay.tsx",
-          "operation": "delete",
-          "description": "Delete the obsolete centered FM overlay component so the FM logo image is no longer used and no dead code remains."
+          "path": "frontend/src/components/UserDashboard.tsx",
+          "operation": "modify",
+          "description": "Add support for a guest/unauthenticated display mode (driven by a prop from TopToolbar) that clearly keeps the dashboard read-only/local-only and avoids any authenticated backend-dependent behavior."
         }
       ]
     },
     {
-      "id": "REQ-18",
-      "summary": "Add a centered animated radio-tower symbol with signal waves above the spectrum analyzer, aligned to the same center axis and non-interactive.",
+      "id": "REQ-30",
+      "summary": "Ensure guest station bookmarking persists locally across sessions and the dashboard reflects guest bookmarks correctly.",
       "acceptanceCriteria": [
-        "A radio-tower symbol is visible above the spectrum analyzer in the center of the screen.",
-        "The symbol includes animated signal waves (continuous, clearly noticeable animation).",
-        "The tower + waves animation performs smoothly and does not noticeably degrade rendering performance on mobile devices.",
-        "The tower symbol does not intercept pointer events (pointer-events: none)."
+        "A guest user can bookmark/unbookmark a station from the playback UI, and the bookmark state persists after page reload.",
+        "Opening the User Dashboard as a guest shows the correct bookmarked stations list based on locally stored bookmarks.",
+        "No new authentication providers (Google OAuth, MetaMask, Trust Wallet, Binance Wallet) are added; bookmarking remains functional without login."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/RadioTowerOverlay.tsx",
+          "path": "frontend/src/hooks/useBookmarks.ts",
           "operation": "create",
-          "description": "Create a lightweight React component that renders a radio-tower symbol (prefer SVG or simple divs) with animated signal waves using transform/opacity animations; ensure the root is pointer-events-none and is sized appropriately for mobile."
+          "description": "Create a small bookmarks hook/utility that encapsulates the existing device-local persistence (localStorage) for bookmark IDs and exposes read/toggle helpers plus a lightweight subscription mechanism (e.g., via a custom window event) so multiple UI surfaces can stay in sync without requiring authentication."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/components/RadioPlaybackDisplay.tsx",
           "operation": "modify",
-          "description": "Extend Tailwind animations/keyframes to support smooth, GPU-friendly signal-wave and subtle tower pulse animations (transform/opacity only) that can be applied by RadioTowerOverlay."
-        }
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "summary": "Update App center-overlay composition to a single centered vertical stack (tower above analyzer) and remove obsolete center-overlay code paths.",
-      "acceptanceCriteria": [
-        "frontend/src/App.tsx uses a single centered container for the tower-above-analyzer layout.",
-        "The analyzer remains connected to the current audio element and continues to render as before, only repositioned.",
-        "No broken/unused center overlay components remain referenced by AppContent."
-      ],
-      "file_operations": [
+          "description": "Refactor bookmark read/write logic to use the shared bookmarks hook so guest bookmarking remains device-local, persists across sessions, and emits a change notification that other components (like the dashboard) can react to while open."
+        },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/UserDashboard.tsx",
           "operation": "modify",
-          "description": "Refactor the center overlay into one absolute, screen-centered container that renders a vertical stack: RadioTowerOverlay above AudioSpectrumAnalyzer; keep pointer-events-none on the container, preserve the analyzer props wiring (audioElement/isPlaying/userInteracted), and remove any now-obsolete centered overlay JSX."
+          "description": "Update the dashboard’s bookmark loading to use the shared bookmarks hook and subscribe to bookmark changes so the bookmarked stations list stays accurate for guests (including updates while the overlay is open), based solely on locally stored bookmark IDs."
         }
       ]
     }

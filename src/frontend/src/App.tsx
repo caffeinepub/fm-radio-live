@@ -159,7 +159,7 @@ function AppContent() {
             <TopToolbar onStationSelect={handleStationSelect} />
             
             {/* Centered Radio Tower and Spectrum Analyzer */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-center gap-6">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none flex flex-col items-center gap-6 w-full">
                 <RadioTowerOverlay />
                 <AudioSpectrumAnalyzer 
                     audioElement={audioElement} 

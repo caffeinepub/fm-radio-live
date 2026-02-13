@@ -1,95 +1,99 @@
 {
   "kind": "build_request",
-  "title": "Center the spectrum analyzer and replace the FM logo with an animated radio-tower symbol",
+  "title": "Enable guest dashboard access + ensure guest bookmarking persists, and finalize spectrum analyzer 10-bar edge-to-edge layout",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-16",
-      "text": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene.",
+      "id": "REQ-27",
+      "text": "Update the AudioSpectrumAnalyzer visualization to render a maximum of 10 total bars (mirrored 5 left + 5 right) with reduced individual bar width and a dynamic bar-width-to-gap ratio such that the mirrored bars fill 100% of the horizontal screen width edge-to-edge (no intentional left/right padding), while preserving the existing center-out mirrored layout and grayscale-only styling.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
+          "msg-1"
         ],
         "quotes": [
-          "Shift the audio spectrum analyzer to the middle of the screen from the bottom."
+          "Apply these changes and  also fix this 👉 The spectrum‑analyzer update is fully valid. I can add: max 10 bars, reduced bar width, and dynamic bar/spacing ratio so the full horizontal width is filled edge‑to‑edge."
         ]
       },
       "acceptanceCriteria": [
-        "On common mobile viewport sizes, the spectrum analyzer renders centered in the screen (not near the bottom).",
-        "The analyzer remains non-interactive (pointer-events do not block interactions with other UI).",
-        "No layout regressions occur for TopToolbar, playback display, or audio player UI."
+        "When audio is playing, the spectrum analyzer shows no more than 10 bars total, symmetrically mirrored from the center axis.",
+        "Bar width is visibly reduced compared to the current implementation, and spacing is computed dynamically so the full set of mirrored bars spans the entire canvas width edge-to-edge (no 95% width or similar padding).",
+        "The analyzer remains grayscale-only (no color palettes, glow, or gradients)."
       ]
     },
     {
-      "id": "REQ-17",
-      "text": "Remove the centered FM logo overlay from the main display (stop rendering the existing FmRadioCenterOverlay and ensure the FM logo image is no longer shown in the center of the screen).",
+      "id": "REQ-28",
+      "text": "Fix AudioSpectrumAnalyzer canvas sizing/resize behavior so the drawing scale is correct after initial load and after window resizes (avoid cumulative canvas context scaling across multiple resize calls), and ensure the visualization continues to animate smoothly.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7"
-        ],
-        "quotes": [
-          "Remove the FM logo and replace it with only a radio tower symbol and place it above the spectrum analyser."
+          "msg-1"
         ]
       },
       "acceptanceCriteria": [
-        "The FM logo image is not visible anywhere in the centered main display overlay area during normal app usage.",
-        "No unused imports/components remain related to the removed centered FM overlay (project builds cleanly without unused-variable/type errors)."
+        "Resizing the window does not cause the bars to become stretched/compressed incorrectly or progressively scaled due to repeated ctx.scale calls.",
+        "The analyzer continues rendering smoothly (no flicker/jitter introduced by resizing)."
       ]
     },
     {
-      "id": "REQ-18",
-      "text": "Add a centered radio-tower symbol with animated signal waves and place it directly above the centered AudioSpectrumAnalyzer, aligned to the same center axis.",
+      "id": "REQ-29",
+      "text": "Allow unauthenticated (guest/anonymous) users to open and use the User Dashboard overlay with limited privileges (read-only / local-only), instead of blocking access behind Internet Identity login.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "Tower with animated signal waves"
+          "If the proposed authentication upgrade cannot be implemented, the system should allow unauthenticated (guest) users to access the dashboard module with limited privileges."
         ]
       },
       "acceptanceCriteria": [
-        "A radio-tower symbol is visible above the spectrum analyzer in the center of the screen.",
-        "The symbol includes animated signal waves (continuous, clearly noticeable animation).",
-        "The tower + waves animation performs smoothly and does not noticeably degrade rendering performance on mobile devices.",
-        "The tower symbol does not intercept pointer events (pointer-events: none)."
+        "Clicking the Dashboard button opens the User Dashboard even when not logged in.",
+        "Dashboard contents for guests are limited to locally available information (e.g., local bookmarks and station-derived counts) and do not require any authenticated backend calls.",
+        "Any existing authenticated-only actions (if present elsewhere) remain protected and continue to require Internet Identity."
       ]
     },
     {
-      "id": "REQ-19",
-      "text": "Update the center-overlay composition in frontend/src/App.tsx so the radio-tower symbol and the AudioSpectrumAnalyzer are arranged as a single centered vertical stack (tower above analyzer), and remove any now-obsolete center-overlay code paths.",
+      "id": "REQ-30",
+      "text": "Ensure channel/station bookmarking works for non-authenticated (guest) users and persists locally across sessions using device-level storage (continue using the existing localStorage/IndexedDB approach already present in the app), and ensure the dashboard reflects guest bookmarks correctly.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-7",
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "Shift the audio spectrum analyzer to the middle of the screen from the bottom.",
-          "Tower with animated signal waves"
+          "Additionally, enable channel bookmarking functionality for non-authenticated users. Bookmarked data should be persisted locally using device-level storage (e.g., local storage, IndexedDB, or secure app storage), ensuring state retention across sessions within the application environment"
         ]
       },
       "acceptanceCriteria": [
-        "frontend/src/App.tsx uses a single centered container for the tower-above-analyzer layout.",
-        "The analyzer remains connected to the current audio element and continues to render as before, only repositioned.",
-        "No broken/unused center overlay components remain referenced by AppContent."
+        "A guest user can bookmark/unbookmark a station from the playback UI, and the bookmark state persists after page reload.",
+        "Opening the User Dashboard as a guest shows the correct bookmarked stations list based on locally stored bookmarks.",
+        "No new authentication providers (Google OAuth, MetaMask, Trust Wallet, Binance Wallet) are added; bookmarking remains functional without login."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
-    "Do not introduce additional backend services or databases; keep changes in the existing React + TypeScript frontend.",
-    "Keep the Internet Computer single-actor backend architecture unchanged (no backend changes required for this request)."
+    "Frontend files under frontend/immutablePaths must not be edited (compose existing components/hooks instead).",
+    "Backend must remain single-actor (all Motoko logic in backend/main.mo).",
+    "Do not add third-party authentication providers (only Internet Identity is supported)."
   ],
   "nonGoals": [
-    "Changing station fetching, caching, or prioritization behavior.",
-    "Changing audio playback/reconnection behavior beyond what is necessary to reposition overlays.",
-    "Adding new authentication providers or third-party integrations."
+    "Implementing Google (OAuth 2.0) login.",
+    "Implementing MetaMask/Trust Wallet/Binance Wallet login or any global wallet discovery feature.",
+    "Adding server-side persistence for guest bookmarks (guest bookmarks must remain device-local)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

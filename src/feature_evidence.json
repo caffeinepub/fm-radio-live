@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-move-the-audiospectrumanalyzer-overlay-so-it-is-visually-centered-in-the-middle-of-the-screen-remove-any-extra-offset-that-pushes-it-downward-while-keeping-it-centered-horizontally-and-vertically-above-the-3d-scene",
-      "featureTitle": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene.",
+      "featureId": "feature-update-the-audiospectrumanalyzer-visualization-to-render-a-maximum-of-10-total-bars-mirrored-5-left-5-right-with-reduced-individual-bar-width-and-a-dynamic-bar-width-to-gap-ratio-such-that-the-mirrored-bars-fill-100-of-the-horizontal-screen-width-edge-to-edge-no-intentional-left-right-padding-while-preserving-the-existing-center-out-mirrored-layout-and-grayscale-only-styling",
+      "featureTitle": "Update the AudioSpectrumAnalyzer visualization to render a maximum of 10 total bars (mirrored 5 left + 5 right) with reduced individual bar width and a dynamic bar-width-to-gap ratio such that the mirrored bars fill 100% of the horizontal screen width edge-to-edge (no intentional left/right padding), while preserving the existing center-out mirrored layout and grayscale-only styling.",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/components/AudioSpectrumAnalyzer.tsx"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -17,16 +17,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-27"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-remove-the-centered-fm-logo-overlay-from-the-main-display-stop-rendering-the-existing-fmradiocenteroverlay-and-ensure-the-fm-logo-image-is-no-longer-shown-in-the-center-of-the-screen",
-      "featureTitle": "Remove the centered FM logo overlay from the main display (stop rendering the existing FmRadioCenterOverlay and ensure the FM logo image is no longer shown in the center of the screen).",
+      "featureId": "feature-fix-audiospectrumanalyzer-canvas-sizing-resize-behavior-so-the-drawing-scale-is-correct-after-initial-load-and-after-window-resizes-avoid-cumulative-canvas-context-scaling-across-multiple-resize-calls-and-ensure-the-visualization-continues-to-animate-smoothly",
+      "featureTitle": "Fix AudioSpectrumAnalyzer canvas sizing/resize behavior so the drawing scale is correct after initial load and after window resizes (avoid cumulative canvas context scaling across multiple resize calls), and ensure the visualization continues to animate smoothly.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/FmRadioCenterOverlay.tsx"
+        "frontend/src/components/AudioSpectrumAnalyzer.tsx"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -38,16 +37,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-17"
+        "REQ-28"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-centered-radio-tower-symbol-with-animated-signal-waves-and-place-it-directly-above-the-centered-audiospectrumanalyzer-aligned-to-the-same-center-axis",
-      "featureTitle": "Add a centered radio-tower symbol with animated signal waves and place it directly above the centered AudioSpectrumAnalyzer, aligned to the same center axis.",
+      "featureId": "feature-allow-unauthenticated-guest-anonymous-users-to-open-and-use-the-user-dashboard-overlay-with-limited-privileges-read-only-local-only-instead-of-blocking-access-behind-internet-identity-login",
+      "featureTitle": "Allow unauthenticated (guest/anonymous) users to open and use the User Dashboard overlay with limited privileges (read-only / local-only), instead of blocking access behind Internet Identity login.",
       "files": [
-        "frontend/src/components/RadioTowerOverlay.tsx",
-        "frontend/tailwind.config.js"
+        "frontend/src/components/TopToolbar.tsx",
+        "frontend/src/components/UserDashboard.tsx"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -59,15 +58,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-18"
+        "REQ-29"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-center-overlay-composition-in-frontend-src-app-tsx-so-the-radio-tower-symbol-and-the-audiospectrumanalyzer-are-arranged-as-a-single-centered-vertical-stack-tower-above-analyzer-and-remove-any-now-obsolete-center-overlay-code-paths",
-      "featureTitle": "Update the center-overlay composition in frontend/src/App.tsx so the radio-tower symbol and the AudioSpectrumAnalyzer are arranged as a single centered vertical stack (tower above analyzer), and remove any now-obsolete center-overlay code paths.",
+      "featureId": "feature-ensure-channel-station-bookmarking-works-for-non-authenticated-guest-users-and-persists-locally-across-sessions-using-device-level-storage-continue-using-the-existing-localstorage-indexeddb-approach-already-present-in-the-app-and-ensure-the-dashboard-reflects-guest-bookmarks-correctly",
+      "featureTitle": "Ensure channel/station bookmarking works for non-authenticated (guest) users and persists locally across sessions using device-level storage (continue using the existing localStorage/IndexedDB approach already present in the app), and ensure the dashboard reflects guest bookmarks correctly.",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/components/RadioPlaybackDisplay.tsx",
+        "frontend/src/components/UserDashboard.tsx",
+        "frontend/src/hooks/useBookmarks.ts"
       ],
       "components": [
         "http-outcalls@3.0.0",
@@ -79,7 +80,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-19"
+        "REQ-30"
       ],
       "confidence": "high"
     }

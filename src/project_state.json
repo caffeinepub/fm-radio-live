@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
+  "projectStateVersion": 23,
   "summary": "Global FM / “Gracy FM Radio Live” is a web/PWA app that loads thousands of worldwide radio stations from the Radio Browser API, provides search/selection UI, and streams the selected station with a resilient HTML5 audio player. The frontend is built with React + TanStack React Query (multi-layer caching and background lazy-loading optimized for slow networks), optional authentication via Internet Computer Internet Identity, and a Motoko backend canister that implements role-based access control plus user profile/statistics endpoints used by an authenticated user dashboard. The UI includes PWA install prompting, service-worker offline caching for core assets, donation modal, bookmarking, and a fully implemented 3D space + Earth/globe scene with radio pins and supporting UI elements (header/tagline/counter/toggles), with shadcn/ui components incorporated for consistent UI primitives.",
   "architectural_notes": [
     "Frontend uses TanStack React Query as the primary async/state layer for station data and backend actor calls (query keys, staleTime/gcTime, invalidate/remove on refresh).",
@@ -20,7 +20,7 @@
     "BlinkingStars updates star sizes using Math.random() every frame, which can cause unnecessary churn/GC and non-deterministic twinkle behavior.",
     "Audio spectrum analyzer visualization is not reacting to the currently playing audio stream (no response)."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "IF-1",
@@ -430,6 +430,94 @@
         "REQ-19"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-audio-spectrum-analyzer-visualization-to-animate-outward-from-the-center-using-a-mirrored-bar-layout-equal-bars-extending-to-the-left-and-right-from-a-center-axis-while-audio-is-playing",
+      "title": "Update the audio spectrum analyzer visualization to animate outward from the center using a mirrored bar layout (equal bars extending to the left and right from a center axis) while audio is playing.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-spectrum-analyzer-motion-smooth-and-clean-by-applying-stable-per-frame-interpolation-smoothing-to-bar-heights-so-the-animation-does-not-jitter-while-remaining-responsive-to-audio",
+      "title": "Make the spectrum analyzer motion smooth and clean by applying stable per-frame interpolation (smoothing) to bar heights so the animation does not jitter while remaining responsive to audio.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restyle-the-spectrum-analyzer-to-be-strictly-classic-black-and-white-grayscale-only-remove-all-multi-color-palettes-remove-glow-effects-and-remove-any-color-gradients-used-for-bars-use-only-grayscale-fills-for-the-bars-and-grayscale-ui-styling-for-the-canvas-container",
+      "title": "Restyle the spectrum analyzer to be strictly classic black-and-white (grayscale only): remove all multi-color palettes, remove glow effects, and remove any color gradients used for bars; use only grayscale fills for the bars and grayscale UI styling for the canvas container.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-and-clean-up-audiospectrumanalyzer-implementation-to-remove-now-unused-color-gradient-related-code-paths-including-palette-definitions-and-related-helpers-so-the-project-builds-cleanly-without-unused-variables-imports",
+      "title": "Refactor and clean up AudioSpectrumAnalyzer implementation to remove now-unused color/gradient-related code paths (including palette definitions and related helpers) so the project builds cleanly without unused variables/imports.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-visible-border-box-outline-around-the-audiospectrumanalyzer-canvas-container-so-the-analyzer-renders-without-any-border-stroke-outline",
+      "title": "Remove the visible border/box outline around the AudioSpectrumAnalyzer canvas container so the analyzer renders without any border stroke/outline.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-limit-the-spectrum-analyzer-visualization-to-a-maximum-of-10-total-bars-while-preserving-the-existing-mirrored-center-out-layout-i-e-mirrored-left-right-bars-should-still-be-symmetric",
+      "title": "Limit the spectrum analyzer visualization to a maximum of 10 total bars while preserving the existing mirrored, center-out layout (i.e., mirrored left/right bars should still be symmetric).",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-increase-the-spectrum-analyzer-bar-thickness-and-compute-bar-width-spacing-dynamically-so-the-mirrored-bars-span-the-full-screen-width-from-left-to-right-responsive-to-different-device-widths-while-keeping-the-analyzer-centered-in-the-existing-overlay-stack",
+      "title": "Increase the spectrum analyzer bar thickness and compute bar width + spacing dynamically so the mirrored bars span the full screen width from left to right (responsive to different device widths), while keeping the analyzer centered in the existing overlay stack.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-audiospectrumanalyzer-visualization-to-render-a-maximum-of-10-total-bars-mirrored-5-left-5-right-with-reduced-individual-bar-width-and-a-dynamic-bar-width-to-gap-ratio-such-that-the-mirrored-bars-fill-100-of-the-horizontal-screen-width-edge-to-edge-no-intentional-left-right-padding-while-preserving-the-existing-center-out-mirrored-layout-and-grayscale-only-styling",
+      "title": "Update the AudioSpectrumAnalyzer visualization to render a maximum of 10 total bars (mirrored 5 left + 5 right) with reduced individual bar width and a dynamic bar-width-to-gap ratio such that the mirrored bars fill 100% of the horizontal screen width edge-to-edge (no intentional left/right padding), while preserving the existing center-out mirrored layout and grayscale-only styling.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-audiospectrumanalyzer-canvas-sizing-resize-behavior-so-the-drawing-scale-is-correct-after-initial-load-and-after-window-resizes-avoid-cumulative-canvas-context-scaling-across-multiple-resize-calls-and-ensure-the-visualization-continues-to-animate-smoothly",
+      "title": "Fix AudioSpectrumAnalyzer canvas sizing/resize behavior so the drawing scale is correct after initial load and after window resizes (avoid cumulative canvas context scaling across multiple resize calls), and ensure the visualization continues to animate smoothly.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-allow-unauthenticated-guest-anonymous-users-to-open-and-use-the-user-dashboard-overlay-with-limited-privileges-read-only-local-only-instead-of-blocking-access-behind-internet-identity-login",
+      "title": "Allow unauthenticated (guest/anonymous) users to open and use the User Dashboard overlay with limited privileges (read-only / local-only), instead of blocking access behind Internet Identity login.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-channel-station-bookmarking-works-for-non-authenticated-guest-users-and-persists-locally-across-sessions-using-device-level-storage-continue-using-the-existing-localstorage-indexeddb-approach-already-present-in-the-app-and-ensure-the-dashboard-reflects-guest-bookmarks-correctly",
+      "title": "Ensure channel/station bookmarking works for non-authenticated (guest) users and persists locally across sessions using device-level storage (continue using the existing localStorage/IndexedDB approach already present in the app), and ensure the dashboard reflects guest bookmarks correctly.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -466,6 +554,30 @@
     {
       "id": "AR-8",
       "summary": "Remove the FM logo and replace it with a radio tower symbol that has animated signal waves, positioned above the spectrum analyzer.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Update the AudioSpectrumAnalyzer visualization to animate outward from the center with mirrored bars on both sides, smooth/clean motion, and a classic black-and-white (grayscale) design with no color gradients.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Spectrum analyzer UI adjustments: remove container border/outline, cap bars to max 10, increase bar thickness, and adjust bar widths/spacing so bars span full screen width left-to-right.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Allow unauthenticated (guest/anonymous) users to access the dashboard module with limited/readonly privileges; keep protected backend actions requiring Internet Identity.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Enable channel/station bookmarking for non-authenticated (guest) users with local-only persistence (localStorage/IndexedDB/secure device storage) retained across sessions; optionally keep logged-in users syncing as before.",
       "reqIds": [],
       "status": "pending"
     }

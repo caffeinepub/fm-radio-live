@@ -1,51 +1,51 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T15:26:44.390Z",
-  "summary": "Diff adds a new RadioTowerOverlay with animated signal waves and updates App.tsx to import/use it alongside AudioSpectrumAnalyzer, but the provided truncation does not clearly show the new centered stacking container or confirm the FM logo overlay removal/cleanup and analyzer centering changes. An unrelated screen-orientation-lock behavior appears to have been introduced in App.tsx.",
+  "generatedAt": "2026-02-13T07:33:32.675Z",
+  "summary": "Diff implements a new localStorage-backed bookmarks hook, integrates bookmarking into playback UI, updates UserDashboard to support a guest mode view using local bookmarks, and modifies AudioSpectrumAnalyzer with DPR-aware resizing and a 10-bar mirrored setup. However, the diff summary is truncated around the spectrum analyzer bar layout and around TopToolbar’s dashboard-opening logic, so some acceptance-criteria details cannot be fully verified from the provided evidence.",
   "missing_requirements": [
     {
-      "id": "REQ-16",
-      "requirement": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene; keep it non-interactive (pointer-events) and avoid layout regressions.",
-      "reason": "The diff summary does not include the specific layout/container CSS/classes (or any removed offsets) that would demonstrate the analyzer was re-centered vertically (especially on mobile) and kept pointer-events non-interactive. App.tsx is truncated before any overlay layout markup is shown.",
+      "id": "REQ-27",
+      "requirement": "AudioSpectrumAnalyzer must render max 10 total bars (mirrored 5+5) with reduced bar width and a dynamic bar-width-to-gap ratio that fills 100% width edge-to-edge (no intentional left/right padding), preserving mirrored grayscale-only styling.",
+      "reason": "The diff shows `barCount = 10` and mentions “edge-to-edge” and “dynamic bar width,” but the crucial bar-width/gap computation and any explicit removal of padding (plus grayscale-only styling) are in the truncated portion, so edge-to-edge filling and grayscale-only styling cannot be confirmed from the provided diff excerpt.",
       "evidence": [
-        "frontend/src/App.tsx (truncated)"
+        "frontend/src/components/AudioSpectrumAnalyzer.tsx (truncated: dynamic bar width section not shown)"
       ]
     },
     {
-      "id": "REQ-17",
-      "requirement": "Remove the centered FM logo overlay (stop rendering FmRadioCenterOverlay; ensure FM logo image no longer shown; remove unused imports/components).",
-      "reason": "While App.tsx no longer shows an import of FmRadioCenterOverlay in the visible portion, the diff does not show the relevant render section (truncated) nor the actual changes inside FmRadioCenterOverlay.tsx (only that it was modified). Therefore, it cannot be confirmed that the FM logo is no longer rendered and that related code paths/imports were fully removed/cleaned.",
+      "id": "REQ-29",
+      "requirement": "Guests (unauthenticated users) can open and use the User Dashboard overlay without being blocked by Internet Identity; guest dashboard must avoid authenticated backend calls and keep authenticated-only actions protected.",
+      "reason": "UserDashboard now has an `isGuest` prop and shows a Guest Mode notice, but the diff excerpt of TopToolbar is truncated before showing the Dashboard button click handler and whether it conditionally blocks/opens for unauthenticated users. Also, the dashboard still calls `useRadioStations()` (a network fetch) which may be acceptable for “station-derived counts,” but the requirement explicitly says guest dashboard contents must not require authenticated backend calls—this cannot be fully validated from the truncated diff and lack of visibility into any authenticated-only calls within the dashboard flow.",
       "evidence": [
-        "frontend/src/App.tsx (truncated)",
-        "frontend/src/components/FmRadioCenterOverlay.tsx (modified, content not shown)"
-      ]
-    },
-    {
-      "id": "REQ-19",
-      "requirement": "Update center-overlay composition in frontend/src/App.tsx so radio-tower symbol and AudioSpectrumAnalyzer are arranged as a single centered vertical stack, and remove obsolete center-overlay code paths.",
-      "reason": "App.tsx is truncated before the JSX for the center overlay is shown, so the presence of a single centered container, a vertical stack (tower above analyzer), and removal of obsolete overlay code paths cannot be directly verified from the provided diff excerpt.",
-      "evidence": [
-        "frontend/src/App.tsx (truncated)"
+        "frontend/src/components/TopToolbar.tsx (truncated before dashboard open logic)",
+        "frontend/src/components/UserDashboard.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Screen orientation lock to portrait plus orientationchange prevention logic added to AppContent.",
-      "reason": "Not requested by any requirement (REQ-16..REQ-19 are about centering overlays and replacing the logo), and it changes runtime behavior beyond repositioning overlays.",
+      "description": "Large manual country-name-to-flag fallback mapping in RadioPlaybackDisplay.",
+      "reason": "Not requested by any of REQ-27..REQ-30; appears to be an unrelated UI enhancement added while modifying bookmarking.",
       "evidence": [
-        "frontend/src/App.tsx (shows useEffect that calls screen.orientation.lock('portrait') and adds an orientationchange listener)"
+        "frontend/src/components/RadioPlaybackDisplay.tsx (flagMap fallback list)"
+      ]
+    },
+    {
+      "description": "Custom global `bookmarks-changed` window event to broadcast bookmark updates across components.",
+      "reason": "REQ-30 requires local persistence and correct dashboard reflection; an event bus is an additional behavior not explicitly requested (though it supports the requirement).",
+      "evidence": [
+        "frontend/src/hooks/useBookmarks.ts"
       ]
     }
   ],
   "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/components/FmRadioCenterOverlay.tsx",
-    "frontend/src/components/RadioTowerOverlay.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+    "frontend/src/components/RadioPlaybackDisplay.tsx",
+    "frontend/src/components/TopToolbar.tsx",
+    "frontend/src/components/UserDashboard.tsx",
+    "frontend/src/hooks/useBookmarks.ts",
     "project_state.json"
   ]
 }

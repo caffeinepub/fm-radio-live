@@ -1,48 +1,20 @@
 import { Share2, Bookmark, BookmarkCheck } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import type { RadioStation } from '../hooks/useQueries';
+import { useBookmarks } from '../hooks/useBookmarks';
 
 interface RadioPlaybackDisplayProps {
     station: RadioStation | null;
 }
 
-// Local storage key for bookmarks
-const BOOKMARKS_KEY = 'globalfm_bookmarks';
-
-// Get bookmarks from localStorage
-function getBookmarks(): string[] {
-    try {
-        const stored = localStorage.getItem(BOOKMARKS_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch {
-        return [];
-    }
-}
-
-// Save bookmarks to localStorage
-function saveBookmarks(bookmarks: string[]): void {
-    try {
-        localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
-    } catch {
-        // Ignore localStorage errors
-    }
-}
-
 export default function RadioPlaybackDisplay({ station }: RadioPlaybackDisplayProps) {
-    const [isBookmarked, setIsBookmarked] = useState(false);
-
-    // Check if current station is bookmarked
-    useEffect(() => {
-        if (station) {
-            const bookmarks = getBookmarks();
-            setIsBookmarked(bookmarks.includes(station.stationuuid));
-        }
-    }, [station]);
+    const { isBookmarked, toggleBookmark } = useBookmarks();
 
     if (!station) {
         return null;
     }
+
+    const isStationBookmarked = isBookmarked(station.stationuuid);
 
     // Get country flag emoji from country code or name
     const getCountryFlag = (countryCode: string | undefined, countryName: string) => {
@@ -172,22 +144,14 @@ export default function RadioPlaybackDisplay({ station }: RadioPlaybackDisplayPr
 
     // Handle bookmark button click
     const handleBookmark = () => {
-        const bookmarks = getBookmarks();
+        const nowBookmarked = toggleBookmark(station.stationuuid);
         
-        if (isBookmarked) {
-            // Remove bookmark
-            const updated = bookmarks.filter(id => id !== station.stationuuid);
-            saveBookmarks(updated);
-            setIsBookmarked(false);
-            toast.info('Bookmark removed', {
+        if (nowBookmarked) {
+            toast.success('Station bookmarked!', {
                 description: station.name,
             });
         } else {
-            // Add bookmark
-            const updated = [...bookmarks, station.stationuuid];
-            saveBookmarks(updated);
-            setIsBookmarked(true);
-            toast.success('Station bookmarked!', {
+            toast.info('Bookmark removed', {
                 description: station.name,
             });
         }
@@ -232,24 +196,24 @@ export default function RadioPlaybackDisplay({ station }: RadioPlaybackDisplayPr
                             <button 
                                 onClick={handleBookmark}
                                 className={`w-11 h-11 rounded-full transition-all duration-200 flex items-center justify-center group hover:scale-105 active:scale-95 ${
-                                    isBookmarked 
+                                    isStationBookmarked 
                                         ? 'bg-yellow-600/70 hover:bg-yellow-500/70' 
                                         : 'bg-slate-700/50 hover:bg-slate-600/50'
                                 }`}
-                                aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark station'}
+                                aria-label={isStationBookmarked ? "Remove bookmark" : "Bookmark station"}
                             >
-                                {isBookmarked ? (
+                                {isStationBookmarked ? (
                                     <BookmarkCheck className="w-4 h-4 text-white" />
                                 ) : (
-                                    <Bookmark className="w-4 h-4 text-white transition-transform group-hover:scale-110" />
+                                    <Bookmark className="w-4 h-4 text-white" />
                                 )}
                             </button>
                         </div>
                         
-                        {/* Attribution text */}
-                        <p className="text-xs text-white font-bold tracking-wide whitespace-nowrap mt-1">
-                            App built by Bhawan Bisht
-                        </p>
+                        {/* Attribution Text */}
+                        <div className="text-[10px] text-slate-500 text-right leading-tight">
+                            Powered by<br />Radio Browser API
+                        </div>
                     </div>
                 </div>
             </div>

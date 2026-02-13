@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Center the AudioSpectrumAnalyzer overlay and replace the centered FM logo overlay with a radio-tower symbol that has animated signal waves above the analyzer.
+**Goal:** Let guests access the User Dashboard and persist station bookmarks locally, while finalizing the AudioSpectrumAnalyzer to a 10-bar, edge-to-edge mirrored layout with correct resize behavior.
 
 **Planned changes:**
-- Reposition the AudioSpectrumAnalyzer overlay to be visually centered on common mobile viewports (remove downward offset) while keeping it non-interactive.
-- Remove the centered FM logo overlay from the main display so it is no longer rendered or visible.
-- Add a centered radio-tower symbol with continuously animated signal waves, positioned directly above the centered analyzer and aligned on the same center axis; ensure it does not intercept pointer events.
-- Update `frontend/src/App.tsx` center-overlay layout to a single centered vertical stack (tower above analyzer) and remove obsolete center-overlay code paths/imports.
+- Update the AudioSpectrumAnalyzer to render a maximum of 10 total bars (5 mirrored on each side), reduce bar width, and compute spacing dynamically so bars fill the full canvas width edge-to-edge while keeping the center-out mirrored grayscale style.
+- Fix AudioSpectrumAnalyzer canvas sizing and resize logic to prevent cumulative scaling issues across resizes and keep animation smooth.
+- Allow unauthenticated (guest) users to open and use the User Dashboard overlay with limited, local-only/read-only behavior (no authenticated backend calls).
+- Ensure guest station bookmarking works without login, persists locally across sessions using the existing device-level storage approach, and is reflected correctly in the dashboard.
 
-**User-visible outcome:** The spectrum analyzer appears centered on screen, with an animated radio-tower symbol and signal waves directly above it, and the previous centered FM logo no longer appears.
+**User-visible outcome:** Users can open the dashboard and manage/view bookmarks even when not logged in (with bookmarks persisting after reload), and the spectrum analyzer displays up to 10 grayscale mirrored bars that span the screen edge-to-edge and remain correctly scaled on resize.

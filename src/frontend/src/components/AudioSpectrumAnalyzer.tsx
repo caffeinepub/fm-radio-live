@@ -8,28 +8,39 @@ interface AudioSpectrumAnalyzerProps {
 
 export default function AudioSpectrumAnalyzer({ audioElement, isPlaying, userInteracted }: AudioSpectrumAnalyzerProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const animationFrameRef = useRef<number | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const dataArrayRef = useRef<Uint8Array | null>(null);
     const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+    const previousHeightsRef = useRef<number[]>([]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const container = containerRef.current;
+        if (!canvas || !container) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Set canvas size
-        const dpr = window.devicePixelRatio || 1;
-        const width = 320;
-        const height = 180;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
-        ctx.scale(dpr, dpr);
+        // Responsive canvas sizing
+        const updateCanvasSize = () => {
+            const dpr = window.devicePixelRatio || 1;
+            const width = window.innerWidth;
+            const height = 180;
+            
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            
+            // Reset transform before applying new scale to avoid cumulative scaling
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        };
+
+        updateCanvasSize();
 
         // Initialize Web Audio API
         const initAudio = () => {
@@ -38,8 +49,8 @@ export default function AudioSpectrumAnalyzer({ audioElement, isPlaying, userInt
             try {
                 const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
                 const analyser = audioContext.createAnalyser();
-                analyser.fftSize = 128; // 64 bars
-                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 128;
+                analyser.smoothingTimeConstant = 0.75;
 
                 const source = audioContext.createMediaElementSource(audioElement);
                 source.connect(analyser);
@@ -71,85 +82,104 @@ export default function AudioSpectrumAnalyzer({ audioElement, isPlaying, userInt
             }
         };
 
-        // Vibrant color palette for bars
-        const colors = [
-            { r: 59, g: 130, b: 246 },   // Blue
-            { r: 147, g: 51, b: 234 },   // Purple
-            { r: 236, g: 72, b: 153 },   // Pink
-            { r: 239, g: 68, b: 68 },    // Red
-            { r: 249, g: 115, b: 22 },   // Orange
-            { r: 234, g: 179, b: 8 },    // Yellow
-            { r: 34, g: 197, b: 94 },    // Green
-            { r: 20, g: 184, b: 166 },   // Teal
-        ];
-
-        const getBarColor = (index: number, total: number, intensity: number) => {
-            const colorIndex = Math.floor((index / total) * colors.length);
-            const color = colors[colorIndex % colors.length];
-            const alpha = 0.6 + (intensity * 0.4);
-            return `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+        // Smooth interpolation helper
+        const lerp = (start: number, end: number, factor: number) => {
+            return start + (end - start) * factor;
         };
 
-        // Draw function
+        // Draw function with center-out mirrored bars (max 10 bars, edge-to-edge)
         const draw = () => {
             if (!ctx || !canvas) return;
 
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+
             ctx.clearRect(0, 0, width, height);
 
-            if (!isPlaying || !analyserRef.current || !dataArrayRef.current) {
-                // Idle state - draw minimal flat bars
-                const barCount = 32;
-                const barWidth = (width - (barCount - 1) * 2) / barCount;
-                const minHeight = 4;
+            const barCount = 10; // Total bars (5 pairs mirrored)
+            const halfBarCount = Math.floor(barCount / 2);
+            
+            // Dynamic bar width and spacing to span full width edge-to-edge
+            const centerX = width / 2;
+            const totalWidth = width; // Use 100% of screen width (edge-to-edge)
+            const totalBarSpace = totalWidth / barCount; // Space per bar including gap
+            const barWidth = totalBarSpace * 0.6; // 60% for bar (reduced from 70%)
+            const barGap = totalBarSpace * 0.4; // 40% for gap
+            
+            const maxBarHeight = height - 10;
+            const minHeight = 4;
+            const smoothingFactor = 0.25; // Smooth but responsive
 
-                for (let i = 0; i < barCount; i++) {
-                    const x = i * (barWidth + 2);
+            // Initialize previous heights if needed
+            if (previousHeightsRef.current.length !== halfBarCount) {
+                previousHeightsRef.current = new Array(halfBarCount).fill(minHeight);
+            }
+
+            if (!isPlaying || !analyserRef.current || !dataArrayRef.current) {
+                // Idle state - draw minimal flat mirrored bars
+                for (let i = 0; i < halfBarCount; i++) {
                     const barHeight = minHeight;
                     const y = height - barHeight;
 
-                    ctx.fillStyle = getBarColor(i, barCount, 0.3);
-                    ctx.fillRect(x, y, barWidth, barHeight);
+                    // Left side bar
+                    const xLeft = centerX - (i + 1) * totalBarSpace + barGap / 2;
+                    ctx.fillStyle = 'rgba(128, 128, 128, 0.4)';
+                    ctx.fillRect(xLeft, y, barWidth, barHeight);
+
+                    // Right side bar (mirrored)
+                    const xRight = centerX + i * totalBarSpace + barGap / 2;
+                    ctx.fillStyle = 'rgba(128, 128, 128, 0.4)';
+                    ctx.fillRect(xRight, y, barWidth, barHeight);
+
+                    // Update smoothing array
+                    previousHeightsRef.current[i] = lerp(
+                        previousHeightsRef.current[i],
+                        minHeight,
+                        smoothingFactor
+                    );
                 }
 
                 animationFrameRef.current = requestAnimationFrame(draw);
                 return;
             }
 
-            // Active state - draw spectrum
+            // Active state - draw mirrored spectrum from center
             const dataArray = dataArrayRef.current;
             analyserRef.current.getByteFrequencyData(dataArray as Uint8Array<ArrayBuffer>);
 
-            const barCount = 32;
-            const barWidth = (width - (barCount - 1) * 2) / barCount;
-            const maxBarHeight = height - 10;
-            const minHeight = 4;
-
-            for (let i = 0; i < barCount; i++) {
-                const dataIndex = Math.floor((i / barCount) * dataArray.length);
+            for (let i = 0; i < halfBarCount; i++) {
+                const dataIndex = Math.floor((i / halfBarCount) * dataArray.length);
                 const value = dataArray[dataIndex];
                 const intensity = value / 255;
                 
-                // Smooth bar height with minimum
-                const barHeight = Math.max(minHeight, intensity * maxBarHeight);
-                const x = i * (barWidth + 2);
+                // Calculate target height
+                const targetHeight = Math.max(minHeight, intensity * maxBarHeight);
+                
+                // Smooth interpolation
+                const smoothedHeight = lerp(
+                    previousHeightsRef.current[i],
+                    targetHeight,
+                    smoothingFactor
+                );
+                previousHeightsRef.current[i] = smoothedHeight;
+
+                const barHeight = smoothedHeight;
                 const y = height - barHeight;
 
-                // Draw bar with gradient
-                const gradient = ctx.createLinearGradient(x, y, x, height);
-                const color = getBarColor(i, barCount, intensity);
-                gradient.addColorStop(0, color);
-                gradient.addColorStop(1, color.replace(/[\d.]+\)$/, '0.2)'));
+                // Grayscale intensity mapping (black to white based on intensity)
+                const grayValue = Math.floor(intensity * 200 + 55); // Range: 55-255
+                const alpha = 0.7 + (intensity * 0.3);
+                const fillStyle = `rgba(${grayValue}, ${grayValue}, ${grayValue}, ${alpha})`;
 
-                ctx.fillStyle = gradient;
-                ctx.fillRect(x, y, barWidth, barHeight);
+                // Left side bar
+                const xLeft = centerX - (i + 1) * totalBarSpace + barGap / 2;
+                ctx.fillStyle = fillStyle;
+                ctx.fillRect(xLeft, y, barWidth, barHeight);
 
-                // Add glow effect for high intensity
-                if (intensity > 0.6) {
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = color;
-                    ctx.fillRect(x, y, barWidth, barHeight);
-                    ctx.shadowBlur = 0;
-                }
+                // Right side bar (mirrored)
+                const xRight = centerX + i * totalBarSpace + barGap / 2;
+                ctx.fillStyle = fillStyle;
+                ctx.fillRect(xRight, y, barWidth, barHeight);
             }
 
             animationFrameRef.current = requestAnimationFrame(draw);
@@ -168,19 +198,27 @@ export default function AudioSpectrumAnalyzer({ audioElement, isPlaying, userInt
 
         startAnimation();
 
+        // Handle window resize
+        const handleResize = () => {
+            updateCanvasSize();
+        };
+
+        window.addEventListener('resize', handleResize);
+
         // Cleanup
         return () => {
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
+            window.removeEventListener('resize', handleResize);
         };
     }, [audioElement, isPlaying, userInteracted]);
 
     return (
-        <div className="flex flex-col items-center gap-2">
+        <div ref={containerRef} className="flex flex-col items-center w-screen">
             <canvas
                 ref={canvasRef}
-                className="rounded-lg bg-black/30 backdrop-blur-sm border border-blue-500/20 shadow-lg"
+                className="rounded-lg bg-black/30 backdrop-blur-sm shadow-lg"
             />
         </div>
     );

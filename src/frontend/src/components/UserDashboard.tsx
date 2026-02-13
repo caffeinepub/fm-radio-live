@@ -1,38 +1,29 @@
 import { X, Bookmark, TrendingUp, Activity, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRadioStations } from '../hooks/useQueries';
+import { useBookmarks } from '../hooks/useBookmarks';
 import type { RadioStation } from '../hooks/useQueries';
 
 interface UserDashboardProps {
     isOpen: boolean;
     onClose: () => void;
     onStationSelect?: (station: RadioStation) => void;
+    isGuest: boolean;
 }
 
-const BOOKMARKS_KEY = 'globalfm_bookmarks';
-
-function getBookmarks(): string[] {
-    try {
-        const stored = localStorage.getItem(BOOKMARKS_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch {
-        return [];
-    }
-}
-
-export default function UserDashboard({ isOpen, onClose, onStationSelect }: UserDashboardProps) {
+export default function UserDashboard({ isOpen, onClose, onStationSelect, isGuest }: UserDashboardProps) {
     const [bookmarkedStations, setBookmarkedStations] = useState<RadioStation[]>([]);
     const { data: allStations } = useRadioStations();
+    const { bookmarks } = useBookmarks();
 
     useEffect(() => {
         if (isOpen && allStations) {
-            const bookmarkIds = getBookmarks();
             const bookmarked = allStations.filter(station => 
-                bookmarkIds.includes(station.stationuuid)
+                bookmarks.includes(station.stationuuid)
             );
             setBookmarkedStations(bookmarked);
         }
-    }, [isOpen, allStations]);
+    }, [isOpen, allStations, bookmarks]);
 
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
@@ -73,6 +64,9 @@ export default function UserDashboard({ isOpen, onClose, onStationSelect }: User
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                         <Activity className="h-6 w-6 text-blue-400" />
                         User Dashboard
+                        {isGuest && (
+                            <span className="text-sm font-normal text-slate-400 ml-2">(Guest Mode)</span>
+                        )}
                     </h2>
                     <button
                         onClick={onClose}
@@ -85,6 +79,15 @@ export default function UserDashboard({ isOpen, onClose, onStationSelect }: User
 
                 {/* Content */}
                 <div className="max-h-[70vh] overflow-y-auto p-6 space-y-6">
+                    {isGuest && (
+                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                            <p className="text-sm text-blue-300">
+                                You're viewing the dashboard as a guest. Your bookmarks are stored locally on this device. 
+                                <span className="font-semibold"> Login to sync your data across devices.</span>
+                            </p>
+                        </div>
+                    )}
+
                     {/* Channel Status */}
                     <div>
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">

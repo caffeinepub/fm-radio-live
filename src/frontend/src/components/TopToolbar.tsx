@@ -99,11 +99,8 @@ export default function TopToolbar({ onStationSelect }: TopToolbarProps) {
     };
 
     const handleDashboardClick = () => {
-        if (isAuthenticated) {
-            setShowDashboard(true);
-        } else {
-            toast.info('Please login first to access the dashboard');
-        }
+        // Allow both authenticated and guest users to open dashboard
+        setShowDashboard(true);
     };
 
     const displayStatus = isRefreshing ? 'refreshing' : isLoading ? 'loading' : isFetching ? 'updating' : 'stations';
@@ -190,9 +187,10 @@ export default function TopToolbar({ onStationSelect }: TopToolbarProps) {
             />
 
             <UserDashboard 
-                isOpen={showDashboard && isAuthenticated}
+                isOpen={showDashboard}
                 onClose={() => setShowDashboard(false)}
                 onStationSelect={handleStationSelect}
+                isGuest={!isAuthenticated}
             />
 
             <DonationModal 

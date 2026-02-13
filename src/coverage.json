@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-11T15:26:44.394Z",
+  "generatedAt": "2026-02-13T07:33:32.679Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,51 +11,53 @@
     "implemented": 4,
     "items": [
       {
-        "id": "REQ-16",
-        "summary": "Move the AudioSpectrumAnalyzer overlay so it is visually centered in the middle of the screen (remove any extra offset that pushes it downward), while keeping it centered horizontally and vertically above the 3D scene.",
+        "id": "REQ-27",
+        "summary": "Update the AudioSpectrumAnalyzer visualization to render a maximum of 10 total bars (mirrored 5 left + 5 right) with reduced individual bar width and a dynamic bar-width-to-gap ratio such that the mirrored bars fill 100% of the horizontal screen width edge-to-edge (no intentional left/right padding), while preserving the existing center-out mirrored layout and grayscale-only styling.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/components/AudioSpectrumAnalyzer.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/components/AudioSpectrumAnalyzer.tsx"
         ]
       },
       {
-        "id": "REQ-17",
-        "summary": "Remove the centered FM logo overlay from the main display (stop rendering the existing FmRadioCenterOverlay and ensure the FM logo image is no longer shown in the center of the screen).",
+        "id": "REQ-28",
+        "summary": "Fix AudioSpectrumAnalyzer canvas sizing/resize behavior so the drawing scale is correct after initial load and after window resizes (avoid cumulative canvas context scaling across multiple resize calls), and ensure the visualization continues to animate smoothly.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/FmRadioCenterOverlay.tsx"
+          "frontend/src/components/AudioSpectrumAnalyzer.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/FmRadioCenterOverlay.tsx"
+          "frontend/src/components/AudioSpectrumAnalyzer.tsx"
         ]
       },
       {
-        "id": "REQ-18",
-        "summary": "Add a centered radio-tower symbol with animated signal waves and place it directly above the centered AudioSpectrumAnalyzer, aligned to the same center axis.",
+        "id": "REQ-29",
+        "summary": "Allow unauthenticated (guest/anonymous) users to open and use the User Dashboard overlay with limited privileges (read-only / local-only), instead of blocking access behind Internet Identity login.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/RadioTowerOverlay.tsx",
-          "frontend/tailwind.config.js"
+          "frontend/src/components/TopToolbar.tsx",
+          "frontend/src/components/UserDashboard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/RadioTowerOverlay.tsx",
-          "frontend/tailwind.config.js"
+          "frontend/src/components/TopToolbar.tsx",
+          "frontend/src/components/UserDashboard.tsx"
         ]
       },
       {
-        "id": "REQ-19",
-        "summary": "Update the center-overlay composition in frontend/src/App.tsx so the radio-tower symbol and the AudioSpectrumAnalyzer are arranged as a single centered vertical stack (tower above analyzer), and remove any now-obsolete center-overlay code paths.",
+        "id": "REQ-30",
+        "summary": "Ensure channel/station bookmarking works for non-authenticated (guest) users and persists locally across sessions using device-level storage (continue using the existing localStorage/IndexedDB approach already present in the app), and ensure the dashboard reflects guest bookmarks correctly.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/hooks/useBookmarks.ts",
+          "frontend/src/components/RadioPlaybackDisplay.tsx",
+          "frontend/src/components/UserDashboard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/src/hooks/useBookmarks.ts",
+          "frontend/src/components/RadioPlaybackDisplay.tsx",
+          "frontend/src/components/UserDashboard.tsx"
         ]
       }
     ]
@@ -65,10 +67,11 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/FmRadioCenterOverlay.tsx",
-    "frontend/src/components/RadioTowerOverlay.tsx",
-    "frontend/tailwind.config.js",
+    "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+    "frontend/src/components/RadioPlaybackDisplay.tsx",
+    "frontend/src/components/TopToolbar.tsx",
+    "frontend/src/components/UserDashboard.tsx",
+    "frontend/src/hooks/useBookmarks.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
