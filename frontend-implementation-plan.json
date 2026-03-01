@@ -1,0 +1,138 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Quick Play Radio Station – Light Mood Rebuild",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Implement Quick Play feature that auto-starts the first available or last-played station on app load",
+      "acceptanceCriteria": [
+        "On app load, playback begins automatically for a default or previously played station",
+        "No manual station selection is required before audio starts",
+        "A visual indicator shows which station is auto-playing"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add Quick Play logic in useEffect to automatically select and play the first available station or retrieve the last-played station from localStorage/sessionStorage on mount. Ensure selectedStation state is set before rendering, triggering AudioPlayer autoplay. Add a visual indicator (e.g., badge or label) to RadioPlaybackDisplay showing 'Auto-playing' when Quick Play initiates playback."
+        },
+        {
+          "path": "frontend/src/utils/urlParams.ts",
+          "operation": "modify",
+          "description": "Add utility functions to store and retrieve the last-played station UUID in localStorage or sessionStorage, enabling Quick Play to resume the user's previous station on app reload."
+        },
+        {
+          "path": "frontend/src/components/RadioPlaybackDisplay.tsx",
+          "operation": "modify",
+          "description": "Add a visual indicator (e.g., a small badge, icon, or text label) that appears when Quick Play has auto-started a station, ensuring users know playback began automatically without manual selection."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Redesign entire app UI with very light, airy mood: soft white/pale pastel palette, clean typography, gentle spacing, soft shadows, replacing dark space/star theme with bright, calm, cheerful aesthetic",
+      "acceptanceCriteria": [
+        "Background is white, off-white, or very light pastel — no dark backgrounds",
+        "Text is dark-on-light for readability",
+        "All major UI components reflect the light theme consistently",
+        "The dark space/starfield (SpaceScene, BlinkingStars) is removed or replaced with a light background",
+        "Buttons, cards, and overlays use soft shadows and rounded corners with light fills",
+        "Loading screen matches the light mood"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Replace the SpaceScene component with a light-themed background. Use the generated image frontend/public/assets/generated/radio-hero-light.dim_1200x600.png as a hero background or apply a solid soft white/pale pastel color. Remove all references to dark space/starfield components and ensure the main layout uses light background colors and dark text for readability."
+        },
+        {
+          "path": "frontend/src/components/SpaceScene.tsx",
+          "operation": "modify",
+          "description": "Replace the black space background and BlinkingStars with a light pastel background (e.g., soft white, light coral, or pale cream). Remove or comment out the BlinkingStars component usage and apply a gentle gradient or solid light color instead."
+        },
+        {
+          "path": "frontend/src/components/BlinkingStars.tsx",
+          "operation": "modify",
+          "description": "Remove or disable the blinking starfield animation. Replace Three.js starfield with a static light background or soft pastel gradient. Ensure no dark elements remain in this component."
+        },
+        {
+          "path": "frontend/src/components/TopToolbar.tsx",
+          "operation": "modify",
+          "description": "Update toolbar styling to use light background colors (e.g., white or off-white), dark text, soft shadows, and rounded corners. Replace any dark theme classes with light equivalents. Ensure buttons and icons are visible against the light background."
+        },
+        {
+          "path": "frontend/src/components/AudioPlayer.tsx",
+          "operation": "modify",
+          "description": "Apply light theme styling: use soft white or pale pastel backgrounds, dark text, rounded corners, and subtle soft shadows. Update controls (play/pause, volume) to match the light aesthetic with visible, accessible icons."
+        },
+        {
+          "path": "frontend/src/components/RadioPlaybackDisplay.tsx",
+          "operation": "modify",
+          "description": "Redesign with light theme: soft white or pale pastel card background, dark text, gentle spacing, soft shadows, and rounded corners. Ensure station name, country flag, and controls are clearly visible and styled consistently with the light mood."
+        },
+        {
+          "path": "frontend/src/components/SearchOverlay.tsx",
+          "operation": "modify",
+          "description": "Update overlay to use a light background (white or off-white), dark text, soft shadows, and rounded corners. Ensure the search input, results list, and close button are styled with the light theme palette."
+        },
+        {
+          "path": "frontend/src/components/UserDashboard.tsx",
+          "operation": "modify",
+          "description": "Apply light theme styling: soft white or pale pastel backgrounds, dark text, gentle spacing, soft shadows, and rounded corners. Ensure bookmarks, stats, and guest mode messaging are clearly visible and styled consistently."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Update footer to use light background (white or off-white), dark text, and soft styling. Ensure developer attribution is visible and styled with the light theme."
+        },
+        {
+          "path": "frontend/src/components/LoadingScreen.tsx",
+          "operation": "modify",
+          "description": "Redesign loading screen with light theme: soft white or pale pastel background, dark text, and a cheerful animated radio icon. Replace any dark backgrounds with light equivalents and ensure bouncing indicators match the light aesthetic."
+        },
+        {
+          "path": "frontend/src/components/RadioTowerOverlay.tsx",
+          "operation": "modify",
+          "description": "Update radio signal wave animations and tower icon to use light, warm colors (e.g., light coral, soft white) that blend with the light theme. Ensure the overlay is visible but not overpowering against the light background."
+        },
+        {
+          "path": "frontend/src/components/DonationModal.tsx",
+          "operation": "modify",
+          "description": "Apply light theme styling to the donation modal: soft white or pale pastel background, dark text, rounded corners, and soft shadows. Ensure crypto address blocks and copy buttons are clearly visible and styled consistently."
+        },
+        {
+          "path": "frontend/src/components/PWAInstallPrompt.tsx",
+          "operation": "modify",
+          "description": "Update PWA install prompt banner to use light background (white or off-white), dark text, soft shadows, and rounded corners. Ensure the prompt is clearly visible and styled with the light theme."
+        },
+        {
+          "path": "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+          "operation": "modify",
+          "description": "Update the audio visualizer to use light, warm colors for frequency bars (e.g., light coral, soft orange, pale gold) that complement the light theme. Ensure the canvas background is transparent or light-colored to blend with the overall UI."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Update Tailwind configuration and global CSS to define a light theme token set and apply it consistently across all components",
+      "acceptanceCriteria": [
+        "tailwind.config.js defines a light theme color palette",
+        "index.css sets light background and text defaults",
+        "No hardcoded dark color classes remain in component files"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Define a light theme color palette in the extend.colors section: add tokens for light backgrounds (e.g., 'bg-light': '#fafafa', 'surface-light': '#ffffff'), text colors (e.g., 'text-dark': '#1a1a1a'), accent colors (e.g., 'accent-coral': '#ff7f6a', 'accent-warm': '#ffd9c8'), and border colors (e.g., 'border-light': '#e5e5e5'). Ensure these tokens support the soft white/pale pastel aesthetic."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Set global light theme defaults in the :root or body selector: apply light background colors (e.g., background-color: #fafafa), dark text color (e.g., color: #1a1a1a), and define CSS custom properties for the light theme palette (e.g., --bg-light, --text-dark, --accent-coral). Remove or override any dark theme defaults and ensure smooth transitions for theme-related properties. Reference the generated image frontend/public/assets/generated/radio-hero-light.dim_1200x600.png as a background-image option for hero sections if needed."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Quick play radio station app with a very light mood/theme",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": true,
+  "imageRequirements": "## Required Images\n- Soft pastel radio wave illustration with gentle circular ripples in warm white and light coral tones, used as a hero background (radio-hero-light.dim_1200x600.png)",
+  "existing_features": [
+    {
+      "id": "feature-implement-a-quick-play-feature-that-automatically-starts-playing-the-first-available-or-last-played-radio-station-as-soon-as-the-app-loads-without-requiring-the-user-to-manually-select-a-station-first",
+      "title": "Implement a Quick Play feature that automatically starts playing the first available or last-played radio station as soon as the app loads, without requiring the user to manually select a station first.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-entire-app-ui-with-a-very-light-airy-mood-use-a-soft-white-or-pale-pastel-color-palette-clean-minimal-typography-gentle-spacing-and-subtle-soft-shadow-cards-replace-the-current-dark-space-star-theme-with-a-bright-calm-cheerful-aesthetic-throughout-all-components-header-toptoolbar-audioplayer-radioplaybackdisplay-searchoverlay-userdashboard-footer-loadingscreen",
+      "title": "Redesign the entire app UI with a very light, airy mood: use a soft white or pale pastel color palette, clean minimal typography, gentle spacing, and subtle soft-shadow cards. Replace the current dark space/star theme with a bright, calm, cheerful aesthetic throughout all components (Header, TopToolbar, AudioPlayer, RadioPlaybackDisplay, SearchOverlay, UserDashboard, Footer, LoadingScreen).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-tailwind-configuration-and-global-css-index-css-to-define-a-light-theme-token-set-background-surface-text-accent-border-colors-and-apply-it-consistently-across-all-components",
+      "title": "Update the Tailwind configuration and global CSS (index.css) to define a light theme token set (background, surface, text, accent, border colors) and apply it consistently across all components.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [],
+  "gameProjectType": "none",
+  "projectName": "Quick Play Radio",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

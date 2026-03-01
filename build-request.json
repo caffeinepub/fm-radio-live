@@ -1,0 +1,82 @@
+{
+  "kind": "build_request",
+  "title": "Quick Play Radio Station – Light Mood Rebuild",
+  "projectName": "Global FM Radio",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement a Quick Play feature that automatically starts playing the first available or last-played radio station as soon as the app loads, without requiring the user to manually select a station first.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "Quick play radio station"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On app load, playback begins automatically for a default or previously played station",
+        "No manual station selection is required before audio starts",
+        "A visual indicator shows which station is auto-playing"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Redesign the entire app UI with a very light, airy mood: use a soft white or pale pastel color palette, clean minimal typography, gentle spacing, and subtle soft-shadow cards. Replace the current dark space/star theme with a bright, calm, cheerful aesthetic throughout all components (Header, TopToolbar, AudioPlayer, RadioPlaybackDisplay, SearchOverlay, UserDashboard, Footer, LoadingScreen).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "very light mood"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Background is white, off-white, or very light pastel — no dark backgrounds",
+        "Text is dark-on-light for readability",
+        "All major UI components reflect the light theme consistently",
+        "The dark space/starfield (SpaceScene, BlinkingStars) is removed or replaced with a light background",
+        "Buttons, cards, and overlays use soft shadows and rounded corners with light fills",
+        "Loading screen matches the light mood"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Update the Tailwind configuration and global CSS (index.css) to define a light theme token set (background, surface, text, accent, border colors) and apply it consistently across all components.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "very light mood"
+        ]
+      },
+      "acceptanceCriteria": [
+        "tailwind.config.js defines a light theme color palette",
+        "index.css sets light background and text defaults",
+        "No hardcoded dark color classes remain in component files"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Preserve all existing radio station data fetching and caching logic in useQueries.ts",
+    "Keep backend/main.mo unchanged unless data model changes are required"
+  ],
+  "nonGoals": [
+    "Adding new radio stations or changing station data sources",
+    "Modifying backend access control or user profile logic",
+    "Adding weather functionality",
+    "Changing PWA manifest or service worker caching strategy"
+  ],
+  "imageRequirements": {
+    "required": [
+      "Soft pastel radio wave illustration with gentle circular ripples in warm white and light coral tones, used as a hero background (radio-hero-light.dim_1200x600.png)"
+    ],
+    "edits": []
+  }
+}

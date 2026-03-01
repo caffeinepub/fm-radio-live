@@ -1,0 +1,80 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-implement-a-quick-play-feature-that-automatically-starts-playing-the-first-available-or-last-played-radio-station-as-soon-as-the-app-loads-without-requiring-the-user-to-manually-select-a-station-first",
+      "featureTitle": "Implement a Quick Play feature that automatically starts playing the first available or last-played radio station as soon as the app loads, without requiring the user to manually select a station first.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/RadioPlaybackDisplay.tsx"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "authorization@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-entire-app-ui-with-a-very-light-airy-mood-use-a-soft-white-or-pale-pastel-color-palette-clean-minimal-typography-gentle-spacing-and-subtle-soft-shadow-cards-replace-the-current-dark-space-star-theme-with-a-bright-calm-cheerful-aesthetic-throughout-all-components-header-toptoolbar-audioplayer-radioplaybackdisplay-searchoverlay-userdashboard-footer-loadingscreen",
+      "featureTitle": "Redesign the entire app UI with a very light, airy mood: use a soft white or pale pastel color palette, clean minimal typography, gentle spacing, and subtle soft-shadow cards. Replace the current dark space/star theme with a bright, calm, cheerful aesthetic throughout all components (Header, TopToolbar, AudioPlayer, RadioPlaybackDisplay, SearchOverlay, UserDashboard, Footer, LoadingScreen).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AudioPlayer.tsx",
+        "frontend/src/components/AudioSpectrumAnalyzer.tsx",
+        "frontend/src/components/BlinkingStars.tsx",
+        "frontend/src/components/DonationModal.tsx",
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/components/LoadingScreen.tsx",
+        "frontend/src/components/PWAInstallPrompt.tsx",
+        "frontend/src/components/RadioPlaybackDisplay.tsx",
+        "frontend/src/components/RadioTowerOverlay.tsx",
+        "frontend/src/components/SearchOverlay.tsx",
+        "frontend/src/components/SpaceScene.tsx",
+        "frontend/src/components/TopToolbar.tsx",
+        "frontend/src/components/UserDashboard.tsx"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "authorization@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-tailwind-configuration-and-global-css-index-css-to-define-a-light-theme-token-set-background-surface-text-accent-border-colors-and-apply-it-consistently-across-all-components",
+      "featureTitle": "Update the Tailwind configuration and global CSS (index.css) to define a light theme token set (background, surface, text, accent, border colors) and apply it consistently across all components.",
+      "files": [
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "authorization@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
